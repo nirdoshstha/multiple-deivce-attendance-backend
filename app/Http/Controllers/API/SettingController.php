@@ -5,9 +5,20 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
 
-class SettingController extends BackendBaseController
+use Illuminate\Routing\Controllers\Middleware;
+
+class SettingController extends BackendBaseController implements HasMiddleware
 {
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:settings.show', only: ['settings.show']),
+            new Middleware('permission:settings.store', only: ['settings.store']),
+        ];
+    }
 
     protected $model;
     protected $panel = 'Setting';
@@ -24,7 +35,7 @@ class SettingController extends BackendBaseController
     public function store(Request $request)
     {
 
-        
+
         $request->validate([
             'logo' => 'nullable',
             'fav_icon' => 'nullable',
@@ -45,7 +56,7 @@ class SettingController extends BackendBaseController
             'recaptcha_secret' => 'nullable|string|max:255',
         ]);
 
-        $data = $request->except(['logo', 'fav_icon']);
+        $data = $request->except(['logo', 'fav_icon', 'updated_by', 'created_by']);
 
 
 
@@ -75,7 +86,7 @@ class SettingController extends BackendBaseController
                 'created_by' => auth('sanctum')->user()->id,
             ]);
         }
-         
+
 
         $message = $setting->wasRecentlyCreated
             ? $this->panel . ' created successfully.'

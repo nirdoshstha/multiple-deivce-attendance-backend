@@ -75,11 +75,9 @@ class UserController extends BackendBaseController implements HasMiddleware
     }
 
 
-
     public function show(string $id)
     {
         $user = User::with('roles')->find($id);
-
 
         return response()->json([
             'status' => 200,
@@ -92,82 +90,95 @@ class UserController extends BackendBaseController implements HasMiddleware
 
     public function edit(string $id) {}
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required',
-        ]);
-
-        $user = User::find($id);
-
-        $data = $request->except('image');
-
-        if ($request->hasFile('image')) {
-            $this->deleteImage($user->image);
-            $data['image'] = $this->uploadImage($request->file('image'), 'user');
-        }
-
-
-        $data['password'] = Hash::make($request->password);
-        // $data['role'] = 'admin';
-
-        $user->update($data);
-
-        $user->syncRoles($request->roles);
-
-        return response()->json([
-            'status' => 200,
-            'message' => 'User & Role Sync and updated Successfully!',
-        ]);
-    }
 
     // public function update(Request $request, string $id)
     // {
-    //     $user = User::findOrFail($id);
-
-    //     $validated = $request->validate([
-    //         'name' => ['required', 'string', 'max:255'],
-    //         'email' => ['required', 'email', Rule::unique('users')->ignore($user->id),],
-    //         'phone' => ['nullable', 'string', 'max:20'],
-    //         'password' => ['nullable', 'min:5', 'max:15'],
-    //         'roles' => ['required', 'array'],
-    //         'roles.*' => ['exists:roles,name'],
+    //     $request->validate([
+    //         'name' => 'required',
+    //         'email' => 'required',
     //     ]);
 
-    //     // Upload image
+    //     $user = User::find($id);
+
+    //     $data = $request->except('image');
+
     //     if ($request->hasFile('image')) {
-    //         if ($user->image) {
-    //             $this->deleteImage($user->image);
-    //         }
-
-    //         $validated['image'] = $this->uploadImage($request->file('image'), 'user');
+    //         $this->deleteImage($user->image);
+    //         $data['image'] = $this->uploadImage($request->file('image'), 'user');
     //     }
 
-    //     // Update password only if provided
-    //     if (!empty($request->password)) {
-    //         $validated['password'] = Hash::make($request->password);
-    //     } else {
-    //         unset($validated['password']);
-    //     }
 
-    //     // Remove roles before updating user table
-    //     unset($validated['roles']);
+    //     $data['password'] = Hash::make($request->password);
+    //     // $data['role'] = 'admin';
 
-    //     $user->update($validated);
+    //     $user->update($data);
 
-    //     // Sync roles
     //     $user->syncRoles($request->roles);
 
     //     return response()->json([
     //         'status' => 200,
-    //         'message' => 'User updated successfully.',
-    //         'user' => $user->load('roles'),
+    //         'message' => 'User & Role Sync and updated Successfully!',
+    //         'user' => $user->fresh(),
     //     ]);
     // }
+
+    public function update(Request $request, string $id)
+    {
+
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users')->ignore($user->id),
+            ],
+            'phone' => 'nullable|string|max:20',
+            'password' => 'nullable|min:5|max:15',
+            'image' => 'nullable|max:2048',
+            'roles' => 'nullable|array',
+            'roles.*' => 'exists:roles,name',
+        ]);
+
+        // Upload image
+        if ($request->hasFile('image')) {
+
+            if ($user->image) {
+                $this->deleteImage($user->image);
+            }
+
+            $validated['image'] = $this->uploadImage($request->file('image'), 'user');
+        }
+
+        // Update password only if provided
+        if (!empty($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
+
+        // Update user
+        $user->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? $user->phone,
+            'password' => $validated['password'] ?? $user->password,
+            'image' => $validated['image'] ?? $user->image,
+        ]);
+
+        // Update roles only if roles were sent
+        if ($request->filled('roles')) {
+            $user->syncRoles($request->roles);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'User updated successfully.',
+            'user' => $user->fresh(), //$user->load('roles'),
+        ]);
+    }
+
 
     /**
      * Remove the specified resource from storage.

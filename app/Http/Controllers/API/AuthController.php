@@ -50,9 +50,11 @@ class AuthController extends BackendBaseController
         ]);
 
         // $user = User::where('email', $request->email)->first();
-        $user = User::with(['roles', 'permissions'])
+        $user = User::with(['roles'])
             ->where('email', $request->email)
             ->first();
+
+        $permissions = $user->getAllPermissions()->pluck('name')->toArray();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
@@ -66,15 +68,18 @@ class AuthController extends BackendBaseController
             'status' => 200,
             'message' => 'User Login Successfully!',
             'token' => $token,
-            'user' => $user,
+            'user' => [
+                ...$user->toArray(),
+                'permissions' => $permissions
+            ],
             // User Roles
             'roles' => $user->getRoleNames(),
 
             // Direct + Role Permissions
-            'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
+            'permissions' => $permissions,
 
             // Optional full role objects
-            'roles_data' => $user->roles,
+            // 'roles_data' => $user->roles,
         ]);
     }
 

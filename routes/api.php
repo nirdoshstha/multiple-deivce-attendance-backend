@@ -38,7 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Route::post('/users', [AuthController::class, 'storeUser']);
     // Route::get('/users', [AuthController::class, 'users']);
     // Route::delete('/users/{id}', [AuthController::class, 'deleteUser']);
-    Route::post('/users/{id}', [AuthController::class, 'updateUser']);
+    // Route::post('/users/{id}', [AuthController::class, 'updateUser']); 
     Route::put('/users/update-password/{id}', [AuthController::class, 'updatePassword']);
 
     Route::post('/settings', [SettingController::class, 'store'])->name('settings.store');
