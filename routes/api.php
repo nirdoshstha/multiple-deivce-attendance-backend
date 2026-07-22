@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\API\AboutController;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\DesignationController;
+use App\Http\Controllers\API\GenderController;
 use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\SettingController;
@@ -16,10 +18,9 @@ Route::get('/user', function (Request $request) {
         'id' => $user->id,
         'name' => $user->name,
         'email' => $user->email,
+        'phone' => $user->phone,
         'image' => $user->image,
-
         'roles' => $user->getRoleNames(),
-
         'permissions' => $user->getAllPermissions()->pluck('name'),
     ]);
 })->middleware('auth:sanctum')->name('auth.user');
@@ -32,13 +33,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('users', UserController::class);
     Route::apiResource('roles', RoleController::class);
+    Route::apiResource('genders', GenderController::class);
+    Route::apiResource('designations', DesignationController::class);
     // Route::apiResource('permissions', PermissionController::class);
 
     Route::get('/profile', [AuthController::class, 'profile']);
-    // Route::post('/users', [AuthController::class, 'storeUser']);
-    // Route::get('/users', [AuthController::class, 'users']);
-    // Route::delete('/users/{id}', [AuthController::class, 'deleteUser']);
-    // Route::post('/users/{id}', [AuthController::class, 'updateUser']); 
     Route::put('/users/update-password/{id}', [AuthController::class, 'updatePassword']);
 
     Route::post('/settings', [SettingController::class, 'store'])->name('settings.store');
