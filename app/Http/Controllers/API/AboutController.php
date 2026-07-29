@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 class AboutController extends BackendBaseController
 {
 
-    protected $model;
+    private $model;
     protected $panel = 'About Us';
     protected $img_path = 'uploads/about/';
 

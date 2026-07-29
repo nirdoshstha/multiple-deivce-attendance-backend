@@ -3,27 +3,30 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\Designation;
+use App\Models\Device;
+use App\Models\DeviceBrand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
-class DesignationController extends BackendBaseController
+class DeviceController extends BackendBaseController
 {
 
     private $model;
-    protected $panel = "Designation";
+    protected $panel = "Devices";
 
     public function __construct()
     {
-        $this->model = new Designation();
+        $this->model = new Device();
     }
     public function index()
     {
-        $designations = $this->model->get();
+        $devices = Device::get();
+        $device_brand = DeviceBrand::get();
         return response()->json([
             'status' => 200,
             'message' => $this->panel . ' Fetched Successfully',
-            'designations' => $designations
+            'devices' => $devices,
+            'device_brand' => $device_brand
         ]);
     }
 
@@ -42,11 +45,13 @@ class DesignationController extends BackendBaseController
     {
         $request->validate([
             'name' => 'required',
+            'device_brand_id' => 'required'
         ]);
 
-        $designation = $this->model->create([
+        $device = $this->model->create([
             'name' => $request->name,
-            'key'  => Str::slug($request->name, '_') . '_key',
+            'device_brand_id' => $request->device_brand_id,
+            'type' => $request->type,
             'created_by' => auth('sanctum')->user()->id,
         ]);
 
@@ -66,7 +71,13 @@ class DesignationController extends BackendBaseController
      */
     public function show(string $id)
     {
-        //
+        $device = $this->model->findOrFail($id);
+         $brands = DeviceBrand::get();
+        return response()->json([
+            'status' => 200,
+            'device' => $device,
+            'brands' => $brands
+        ]);
     }
 
     /**
@@ -82,7 +93,26 @@ class DesignationController extends BackendBaseController
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:155'
+        ]);
+
+        $device = $this->model->findOrFail($id);
+        $name = $device->name;
+
+        $data = $request->all();
+
+        $device->update([
+            'name' => $request->name,
+            'device_brand_id' => $request->device_brand_id,
+            'type' => $request->type,
+            'updated_by' => auth('sanctum')->user()->id,
+        ]);
+
+        return response()->json([
+            'status' => 201,
+            'message' => $this->panel . ' "' . $name . '" updated successfully.',
+        ]);
     }
 
     /**
@@ -90,11 +120,11 @@ class DesignationController extends BackendBaseController
      */
     public function destroy(string $id)
     {
-        $designation = $this->model->findOrFail($id);
+        $device = $this->model->findOrFail($id);
 
-        $name = $designation->name;
+        $name = $device->name;
 
-        $designation->delete();
+        $device->delete();
 
         return response()->json([
             'status' => 200,

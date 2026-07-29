@@ -13,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends BackendBaseController
 {
 
-    protected $model;
+    private $model;
     protected $panel = 'User';
     protected $img_path = 'uploads/user/';
 

@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 class GenderController extends BackendBaseController
 {
 
-    protected $model;
+    private $model;
     protected $panel = "Gender";
 
     public function __construct()

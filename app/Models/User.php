@@ -24,7 +24,6 @@ class User extends Authenticatable
         'name',
         'email',
         'image',
-        'role',
         'phone',
         'password',
     ];
@@ -50,5 +49,29 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+
+    // polymorphic many to many relation 
+
+    // public function userable()
+    // {
+    //     return $this->morphTo();
+    // }
+
+
+
+
+
+    public function vendors()
+    {
+        return $this->morphedByMany(Vendor::class, 'userable')->withPivot(['role'])
+            ->withTimestamps();
+    }
+
+    public function companies()
+    {
+        return $this->morphedByMany(Company::class, 'userable')->withPivot(['role'])
+            ->withTimestamps();
     }
 }

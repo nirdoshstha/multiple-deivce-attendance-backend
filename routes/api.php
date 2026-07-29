@@ -2,12 +2,17 @@
 
 use App\Http\Controllers\API\AboutController;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\CompanyController;
+use App\Http\Controllers\API\CompanyDeviceController;
 use App\Http\Controllers\API\DesignationController;
+use App\Http\Controllers\API\DeviceBrandController;
+use App\Http\Controllers\API\DeviceController;
 use App\Http\Controllers\API\GenderController;
 use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\SettingController;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\VendorController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -35,7 +40,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('roles', RoleController::class);
     Route::apiResource('genders', GenderController::class);
     Route::apiResource('designations', DesignationController::class);
+    Route::apiResource('device-brand', DeviceBrandController::class);
+    Route::apiResource('devices', DeviceController::class);
+
+
+    Route::apiResource('company-devices', CompanyDeviceController::class);
+    Route::get('company-devices/restore/{id}', [CompanyDeviceController::class, 'restore'])->name('company_devices.restore');
+    Route::delete('company-devices/permanent/{id}', [CompanyDeviceController::class, 'destroyPermanent'])->name('company_devices.delete_permanent');
+
     // Route::apiResource('permissions', PermissionController::class);
+    // Vendor 
+    Route::apiResource('vendors', VendorController::class);
+    Route::get('vendors/restore/{id}', [VendorController::class, 'restore'])->name('vendor.restore');
+    Route::delete('vendors/destroy/{id}', [VendorController::class, 'destroyPermanent'])->name('vendor.delete_permanent');
+
+    // Company 
+    Route::apiResource('companys', CompanyController::class);
+    Route::get('companys/restore/{id}', [CompanyController::class, 'restore'])->name('company.restore');
+    Route::delete('companys/destroy/{id}', [CompanyController::class, 'destroyPermanent'])->name('company.delete_permanent');
 
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::put('/users/update-password/{id}', [AuthController::class, 'updatePassword']);

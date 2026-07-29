@@ -20,7 +20,7 @@ class SettingController extends BackendBaseController implements HasMiddleware
         ];
     }
 
-    protected $model;
+    private $model;
     protected $panel = 'Setting';
     // protected $base_route = 'api.settings';
     // protected $view_path = 'backend.setting';
