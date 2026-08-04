@@ -59,10 +59,6 @@ class User extends Authenticatable
     //     return $this->morphTo();
     // }
 
-
-
-
-
     public function vendors()
     {
         return $this->morphedByMany(Vendor::class, 'userable')->withPivot(['role'])
@@ -73,5 +69,9 @@ class User extends Authenticatable
     {
         return $this->morphedByMany(Company::class, 'userable')->withPivot(['role'])
             ->withTimestamps();
+    }
+
+    public function company(){
+        return $this->belongsTo(Staff::class, 'company_id','id');
     }
 }

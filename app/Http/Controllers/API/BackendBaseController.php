@@ -29,10 +29,25 @@ class BackendBaseController extends Controller
     }
 
 
-    protected function uploadImage($image)
+    // protected function uploadImage($image)
+    // {
+    //     $image_name = time() . '_' . $image->getClientOriginalName();
+    //     $image->move($this->img_path, $image_name);
+    //     return $image_name;
+    // }
+
+    protected function uploadImage($image, $folder)
     {
+        $destination = public_path('uploads/' . $folder);
+
+        if (!file_exists($destination)) {
+            mkdir($destination, 0777, true);
+        }
+
         $image_name = time() . '_' . $image->getClientOriginalName();
-        $image->move($this->img_path, $image_name);
+
+        $image->move($destination, $image_name);
+
         return $image_name;
     }
 

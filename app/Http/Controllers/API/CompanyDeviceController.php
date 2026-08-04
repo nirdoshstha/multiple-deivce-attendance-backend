@@ -31,9 +31,7 @@ class CompanyDeviceController extends BackendBaseController
         // ]);
 
 
-        $response = Http::get('https://jsonplaceholder.typicode.com/users', [
-            '_limit' => 5 // Supported by JSONPlaceholder
-        ]);
+        $response = Http::get('https://jsonplaceholder.typicode.com/users');
 
 
         if ($response) {

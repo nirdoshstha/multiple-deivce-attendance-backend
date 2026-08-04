@@ -11,8 +11,10 @@ use App\Http\Controllers\API\GenderController;
 use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\SettingController;
+use App\Http\Controllers\API\StaffController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\VendorController;
+use App\Http\Controllers\API\AttendanceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -48,7 +50,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('company-devices/restore/{id}', [CompanyDeviceController::class, 'restore'])->name('company_devices.restore');
     Route::delete('company-devices/permanent/{id}', [CompanyDeviceController::class, 'destroyPermanent'])->name('company_devices.delete_permanent');
 
-    // Route::apiResource('permissions', PermissionController::class);
+    // Staffs
+    Route::apiResource('staffs', StaffController::class);
+    Route::get('staffs/restore/{id}', [StaffController::class, 'restore'])->name('company_devices.restore');
+    Route::delete('staffs/permanent/{id}', [StaffController::class, 'destroyPermanent'])->name('company_devices.delete_permanent');
+
+
+    // Attendances
+    Route::apiResource('attendances',  AttendanceController::class);
+    Route::get('attendances/restore/{id}', [AttendanceController::class, 'restore'])->name('company_devices.restore');
+    Route::delete('attendances/permanent/{id}', [AttendanceController::class, 'destroyPermanent'])->name('company_devices.delete_permanent');
+    Route::get('attendance/search-by-date', [AttendanceController::class, 'searchByDate'])->name('attendance.searchByDate');
+
+    Route::apiResource('permissions', PermissionController::class);
     // Vendor 
     Route::apiResource('vendors', VendorController::class);
     Route::get('vendors/restore/{id}', [VendorController::class, 'restore'])->name('vendor.restore');
