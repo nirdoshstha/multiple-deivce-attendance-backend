@@ -62,6 +62,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('attendances/permanent/{id}', [AttendanceController::class, 'destroyPermanent'])->name('company_devices.delete_permanent');
     Route::get('attendance/search-by-date', [AttendanceController::class, 'searchByDate'])->name('attendance.searchByDate');
 
+    //Search By Month
+    Route::get('/attendance/search-by-month', [AttendanceController::class, 'searchByMonth']);
+
     Route::apiResource('permissions', PermissionController::class);
     // Vendor 
     Route::apiResource('vendors', VendorController::class);
