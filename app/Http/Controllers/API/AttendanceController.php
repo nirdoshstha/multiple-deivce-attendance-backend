@@ -4,11 +4,13 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
+use App\Models\Calendar;
 use App\Models\Holiday;
 use App\Models\Staff;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Krbaidik\AdBsConverter\Facades\NepaliDate;
 
 class AttendanceController extends Controller
 {
@@ -251,53 +253,106 @@ class AttendanceController extends Controller
     //     ]);
     // } 
 
+    // public function searchByDate(Request $request)
+    // {
+    //     $date  = $request->input('date');   // e.g. "2083-04-16"  (full BS date, daily view)
+    //     $month = $request->input('month');  // e.g. 4            (monthly view)
+    //     $year  = $request->input('year');   // e.g. 2083          (monthly view)
+
+    //     $user = auth()->user();
+
+    //     $query = Staff::with([
+    //         'company',
+    //         'designation',
+    //         'attendances' => function ($q) use ($date, $month, $year) {
+
+    //             if ($date) {
+    //                 // ---- Daily search: exact BS date match ----
+    //                 $q->where('date', $date);
+    //             } elseif ($month && $year) {
+
+    //                 $monthStr = str_pad($month, 2, '0', STR_PAD_LEFT);
+    //                 $q->where('date', 'like', "{$year}-{$monthStr}-%");
+    //             }
+
+    //             $q->orderBy('date');
+    //         }
+    //     ]);
+
+    //     if (!$user->can('staffs.view.all')) {
+    //         $query->whereIn('company_id', $user->companies->pluck('id'));
+    //     }
+
+    //     $staffs = $query->get();
+    //     $holidays = Calendar::where('is_holiday', 1)->get();
+
+    //     return response()->json([
+    //         'status' => 200,
+    //         'staffs' => $staffs, 
+    //         'holidays' => $holidays,
+    //     ]);
+    // }
+
     public function searchByDate(Request $request)
     {
-        $date  = $request->input('date');   // e.g. "2083-04-16"  (full BS date, daily view)
-        $month = $request->input('month');  // e.g. 4            (monthly view)
-        $year  = $request->input('year');   // e.g. 2083          (monthly view)
-
         $user = auth()->user();
+
+        $month = str_pad($request->month, 2, '0', STR_PAD_LEFT);
+        $date = $request->year . '-' . $month . '-01';
 
         $query = Staff::with([
             'company',
             'designation',
-            'attendances' => function ($q) use ($date, $month, $year) {
+            'attendances' => function ($q) use ($request) {
 
-                if ($date) {
-                    // ---- Daily search: exact BS date match ----
-                    $q->where('date', $date);
-                } elseif ($month && $year) {
-                    // ---- Monthly search ----
-                    // Dates are stored as plain "YYYY-MM-DD" Nepali (BS) strings,
-                    // so we can't use whereMonth()/whereYear() (those assume
-                    // MySQL can parse the value as a real/Gregorian date, which
-                    // it can't for BS years like 2083). A string LIKE match on
-                    // the year-month prefix works reliably instead.
-                    $monthStr = str_pad($month, 2, '0', STR_PAD_LEFT);
-                    $q->where('date', 'like', "{$year}-{$monthStr}-%");
+                // Daily Search
+                if ($request->date) {
+                    $q->where('date', $request->date);
                 }
-                // If neither is provided, no filter is applied and it will
-                // return ALL attendance rows for each staff — guard against
-                // that on the frontend by always sending one of the two.
+
+
+                // Monthly Search
+                if ($request->year && $request->month) {
+                    $month = str_pad($request->month, 2, '0', STR_PAD_LEFT);
+
+                    $q->where('date', 'like', $request->year . '-' . $month . '-%');
+                }
 
                 $q->orderBy('date');
             }
         ]);
 
+        // Company-wise permission
         if (!$user->can('staffs.view.all')) {
             $query->whereIn('company_id', $user->companies->pluck('id'));
         }
 
         $staffs = $query->get();
-        $holidays = Holiday::whereMonth('nepali_date', $month)
-            ->whereYear('nepali_date', $year)
+
+        // $totalDays = 32; // Get this from your BS calendar library
+        // $days = range(1, $totalDays);
+        // $month = str_pad($request->month, 2, '0', STR_PAD_LEFT);
+
+
+        //Total days in a month of a year real days will be come
+        $totalDays = NepaliDate::getDaysInMonth($request->year, $request->month); // 31
+        $days = range(1, $totalDays);
+
+        $holidays = Calendar::where('is_holiday', 1)
+            ->where('date', 'like', $request->year . '-' . $month . '-%')
             ->get();
+
+        $holiday_date = Calendar::where('is_holiday', 1)
+            ->where('date', $request->date)
+            ->exists();
 
         return response()->json([
             'status' => 200,
             'staffs' => $staffs,
+            'date' => $request->date,
+            'days' => $days,
             'holidays' => $holidays,
+            'disabled' => $holiday_date
         ]);
     }
 }

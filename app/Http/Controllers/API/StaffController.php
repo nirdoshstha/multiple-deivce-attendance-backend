@@ -50,9 +50,9 @@ class StaffController extends BackendBaseController
         //2nd method
         $user = auth()->user();
         if ($user->can('staffs.view.all')) {
-            $staffs = Staff::with('company', 'designation')->get();
+            $staffs = Staff::with('company', 'designation','user')->get();
         } else {
-            $staffs = Staff::with('company', 'designation')
+            $staffs = Staff::with('company', 'designation','user')
                 ->whereIn('company_id', $user->companies->pluck('id'))
                 ->get();
         }
@@ -147,9 +147,11 @@ class StaffController extends BackendBaseController
     public function show(string $id)
     {
         $staff = $this->model->with('company', 'designation', 'creator', 'updator')->find($id);
+        $designations = Designation::get();
         return response()->json([
             'status' => 200,
-            'staff' => $staff
+            'staff' => $staff,
+            'designations' => $designations
         ]);
     }
 
@@ -164,25 +166,121 @@ class StaffController extends BackendBaseController
     /**
      * Update the specified resource in storage.
      */
+    // public function update(Request $request, string $id)
+    // {
+    //     $request->validate([
+    //         'name'  => 'required|string|max:155',
+    //         'email' => 'required|email',
+    //     ]);
+
+    //     try {
+
+    //         DB::beginTransaction();
+
+    //         $staff = $this->model->findOrFail($id);
+
+    //         $data = $request->except('image', 'created_by', 'updated_by');
+
+    //         $user = User::findOrFail($staff->user_id);
+
+
+    //         if ($request->hasFile('image')) {
+    //             $this->deleteImage($user->image);
+    //             $data['image'] = $this->uploadImage($request->file('image'), 'user');
+    //         }
+
+
+    //         $user->update([
+    //             'name'  => $request->name,
+    //             'email' => $request->email,
+    //             'image'      => $data['image'],
+    //         ]);
+
+    //         $staff->update(array_merge($data, [
+    //             'name'       => $request->name,
+    //             'email'      => $request->email,
+    //             'gender'     => $request->gender,
+    //             'phone'      => $request->phone,
+    //             'address'    => $request->address,
+    //             'working_hr' => $request->working_hr,
+    //             'updated_by' => auth('sanctum')->id(),
+    //         ]));
+
+    //         DB::commit();
+
+    //         return response()->json([
+    //             'status'  => 200,
+    //             'message' => $this->panel . ' "' . $request->name . '" updated successfully.',
+    //         ]);
+    //     } catch (\Exception $e) {
+
+    //         DB::rollBack();
+
+    //         return response()->json([
+    //             'status' => 500,
+    //             'message' => $e->getMessage(),
+    //         ]);
+    //     }
+    // }
+
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'name' => 'required|string|max:155'
+            'name'  => 'required|string|max:155',
+            'email' => 'required|email',
         ]);
 
-        $staff = $this->model->findOrFail($id);
-        $name = $staff->name;
+        try {
+            DB::beginTransaction();
 
-        $data = $request->all();
+            $staff = $this->model->findOrFail($id);
+            $user = User::findOrFail($staff->user_id);
 
-        $staff->update($data, +[
-            'updated_by' => auth('sanctum')->user()->id,
-        ]);
+            // Update image only in User model
+            if ($request->hasFile('image')) {
 
-        return response()->json([
-            'status' => 201,
-            'message' => $this->panel . ' "' . $name . '" updated successfully.',
-        ]);
+                if ($user->image) {
+                    $this->deleteImage($user->image);
+                }
+
+                $user->image = $this->uploadImage($request->file('image'), 'user');
+            }
+
+            // Update user name & email
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->save();
+ 
+             $user->syncRoles('Staff');
+
+            // Update staff details (exclude image)
+            $staff->update([
+                'name'         => $request->name,
+                'email'        => $request->email,
+                'gender'       => $request->gender,
+                'phone'        => $request->phone,
+                'address'      => $request->address,
+                'working_hr'   => $request->working_hr,
+                'company_id'   => $request->company_id,
+                'designation_id' => $request->designation_id,
+                'updated_by'   => auth('sanctum')->id(),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 200,
+                'message' => $this->panel . ' "' . $request->name . '" updated successfully.',
+            ]);
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 500,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

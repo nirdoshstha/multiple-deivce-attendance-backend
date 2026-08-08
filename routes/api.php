@@ -15,6 +15,7 @@ use App\Http\Controllers\API\StaffController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\VendorController;
 use App\Http\Controllers\API\AttendanceController;
+use App\Http\Controllers\API\CalendarController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -38,7 +39,9 @@ Route::post('/login', [AuthController::class, 'login'])->name('user.login');
 
 Route::middleware('auth:sanctum')->group(function () {
 
+    Route::get('users/search', [UserController::class, 'userSearch'])->name('users.search');
     Route::apiResource('users', UserController::class);
+
     Route::apiResource('roles', RoleController::class);
     Route::apiResource('genders', GenderController::class);
     Route::apiResource('designations', DesignationController::class);
@@ -54,6 +57,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('staffs', StaffController::class);
     Route::get('staffs/restore/{id}', [StaffController::class, 'restore'])->name('company_devices.restore');
     Route::delete('staffs/permanent/{id}', [StaffController::class, 'destroyPermanent'])->name('company_devices.delete_permanent');
+
+    //Calendar
+    // Route::apiResource('calendar', CalendarController::class)->withoutMiddleware('auth.sanctum');
+    Route::any('calendar', [CalendarController::class, 'store'])->withoutMiddleware('auth:sanctum');
 
 
     // Attendances

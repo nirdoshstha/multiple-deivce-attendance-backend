@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Holiday extends Model
+class Calendar extends Model
 {
-    protected $table = 'holidays';
+    protected $table = 'calendars';
 
     protected $fillable = [
         'title',
-        'nepali_date',
+        'date',
         'slug',
+        'is_holiday'
     ];
 }

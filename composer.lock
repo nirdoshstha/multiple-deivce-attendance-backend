@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "672ca5e14249f0d3b5657d7d1b42d92f",
+    "content-hash": "a1737e54b9691f9354c877706b8faab8",
     "packages": [
         {
             "name": "brick/math",
@@ -1057,6 +1057,58 @@
                 }
             ],
             "time": "2026-06-23T13:02:23+00:00"
+        },
+        {
+            "name": "krbaidik/laravel-ad-bs-converter",
+            "version": "v1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/krbaidik/laravel-ad-bs-converter.git",
+                "reference": "b2438d9fca22e24fe9f63d87ba7bf41d14f537c3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/krbaidik/laravel-ad-bs-converter/zipball/b2438d9fca22e24fe9f63d87ba7bf41d14f537c3",
+                "reference": "b2438d9fca22e24fe9f63d87ba7bf41d14f537c3",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^8.0|^9.0|^10.0|^11.0|^12.0",
+                "nesbot/carbon": "^2.0|^3.0",
+                "php": "^7.3|^8.1"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "NepaliDate": "Krbaidik\\AdBsConverter\\NepaliDateConverterFacade"
+                    },
+                    "providers": [
+                        "Krbaidik\\AdBsConverter\\BsDateServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Krbaidik\\AdBsConverter\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Khubi Ram Baidik (Krbaidik)",
+                    "email": "krbaidik0@gmail.com"
+                }
+            ],
+            "description": "A Laravel package to convert AD dates to BS and vice versa.",
+            "support": {
+                "issues": "https://github.com/krbaidik/laravel-ad-bs-converter/issues",
+                "source": "https://github.com/krbaidik/laravel-ad-bs-converter/tree/v1.0.2"
+            },
+            "time": "2025-05-17T18:39:42+00:00"
         },
         {
             "name": "laravel/framework",

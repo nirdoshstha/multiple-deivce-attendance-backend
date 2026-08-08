@@ -17,29 +17,29 @@ class PublicHolidaySeeder extends Seeder
     {
         //     $holidays = [
         //         // Major public holidays in 2083 BS (approximate Nepali dates)
-        //         ['title' => 'New Year', 'nepali_date' => '2083-01-01', 'slug' => 'new-year'], // Nepali New Year
-        //         ['title' => 'Maha Shivaratri', 'nepali_date' => '2083-11-29', 'slug' => 'maha-shivaratri'],
-        //         ['title' => 'Holi', 'nepali_date' => '2083-12-15', 'slug' => 'holi'],
-        //         ['title' => 'Buddha Jayanti', 'nepali_date' => '2083-02-08', 'slug' => 'buddha-jayanti'],
-        //         ['title' => 'Indra Jatra', 'nepali_date' => '2083-06-22', 'slug' => 'indra-jatra'],
-        //         ['title' => 'Tihar', 'nepali_date' => '2083-07-15', 'slug' => 'tihar'],
-        //         ['title' => 'Christmas', 'nepali_date' => '2083-09-10', 'slug' => 'christmas'], // For example
+        //         ['title' => 'New Year', 'date' => '2083-01-01', 'slug' => 'new-year'], // Nepali New Year
+        //         ['title' => 'Maha Shivaratri', 'date' => '2083-11-29', 'slug' => 'maha-shivaratri'],
+        //         ['title' => 'Holi', 'date' => '2083-12-15', 'slug' => 'holi'],
+        //         ['title' => 'Buddha Jayanti', 'date' => '2083-02-08', 'slug' => 'buddha-jayanti'],
+        //         ['title' => 'Indra Jatra', 'date' => '2083-06-22', 'slug' => 'indra-jatra'],
+        //         ['title' => 'Tihar', 'date' => '2083-07-15', 'slug' => 'tihar'],
+        //         ['title' => 'Christmas', 'date' => '2083-09-10', 'slug' => 'christmas'], // For example
 
         //         // Saturdays for the whole year 2083 BS (Saturday is week day 7)
-        //         ['title' => 'Saturday', 'nepali_date' => '2083-01-03', 'slug' => 'saturday'],
-        //         ['title' => 'Saturday', 'nepali_date' => '2083-01-10', 'slug' => 'saturday'],
-        //         ['title' => 'Saturday', 'nepali_date' => '2083-01-17', 'slug' => 'saturday'],
-        //         ['title' => 'Saturday', 'nepali_date' => '2083-01-24', 'slug' => 'saturday'],
-        //         ['title' => 'Saturday', 'nepali_date' => '2083-01-31', 'slug' => 'saturday'],
-        //         ['title' => 'Saturday', 'nepali_date' => '2083-02-07', 'slug' => 'saturday'],
-        //         ['title' => 'Saturday', 'nepali_date' => '2083-02-14', 'slug' => 'saturday'],
-        //         ['title' => 'Saturday', 'nepali_date' => '2083-02-21', 'slug' => 'saturday'],
-        //         ['title' => 'Saturday', 'nepali_date' => '2083-02-28', 'slug' => 'saturday'],
-        //         ['title' => 'Saturday', 'nepali_date' => '2083-03-06', 'slug' => 'saturday'],
-        //         ['title' => 'Saturday', 'nepali_date' => '2083-03-13', 'slug' => 'saturday'],
-        //         ['title' => 'Saturday', 'nepali_date' => '2083-03-20', 'slug' => 'saturday'],
-        //         ['title' => 'Saturday', 'nepali_date' => '2083-03-27', 'slug' => 'saturday'],
-        //         ['title' => 'Saturday', 'nepali_date' => '2083-04-02', 'slug' => 'saturday'],
+        //         ['title' => 'Saturday', 'date' => '2083-01-03', 'slug' => 'saturday'],
+        //         ['title' => 'Saturday', 'date' => '2083-01-10', 'slug' => 'saturday'],
+        //         ['title' => 'Saturday', 'date' => '2083-01-17', 'slug' => 'saturday'],
+        //         ['title' => 'Saturday', 'date' => '2083-01-24', 'slug' => 'saturday'],
+        //         ['title' => 'Saturday', 'date' => '2083-01-31', 'slug' => 'saturday'],
+        //         ['title' => 'Saturday', 'date' => '2083-02-07', 'slug' => 'saturday'],
+        //         ['title' => 'Saturday', 'date' => '2083-02-14', 'slug' => 'saturday'],
+        //         ['title' => 'Saturday', 'date' => '2083-02-21', 'slug' => 'saturday'],
+        //         ['title' => 'Saturday', 'date' => '2083-02-28', 'slug' => 'saturday'],
+        //         ['title' => 'Saturday', 'date' => '2083-03-06', 'slug' => 'saturday'],
+        //         ['title' => 'Saturday', 'date' => '2083-03-13', 'slug' => 'saturday'],
+        //         ['title' => 'Saturday', 'date' => '2083-03-20', 'slug' => 'saturday'],
+        //         ['title' => 'Saturday', 'date' => '2083-03-27', 'slug' => 'saturday'],
+        //         ['title' => 'Saturday', 'date' => '2083-04-02', 'slug' => 'saturday'],
         //         // Continue Saturdays for entire 2083 year as needed
         //     ];
 
@@ -48,21 +48,26 @@ class PublicHolidaySeeder extends Seeder
 
         $holidays = [
             // Public Holidays of Nepal 2083 BS (approximate dates)
-            ['title' => 'New Year', 'nepali_date' => '2083-01-01', 'slug' => 'new-year'],
-            ['title' => 'Maha Shivaratri', 'nepali_date' => '2083-11-20', 'slug' => 'maha-shivaratri'],
-            ['title' => 'Holi', 'nepali_date' => '2083-12-07', 'slug' => 'holi'],
-            ['title' => 'Buddha Jayanti', 'nepali_date' => '2083-02-28', 'slug' => 'buddha-jayanti'],
-            ['title' => 'Indra Jatra', 'nepali_date' => '2083-06-25', 'slug' => 'indra-jatra'],
-            ['title' => 'Dashain (Fulpati)', 'nepali_date' => '2083-06-20', 'slug' => 'dashain-fulpati'],
-            ['title' => 'Dashain (Bijaya Dashami)', 'nepali_date' => '2083-06-23', 'slug' => 'dashain-bijaya-dashami'],
-            ['title' => 'Tihar (Laxmi Puja)', 'nepali_date' => '2083-07-06', 'slug' => 'tihar-laxmi-puja'],
-            ['title' => 'Chhath', 'nepali_date' => '2083-07-09', 'slug' => 'chhath'],
-            ['title' => 'Christmas Day', 'nepali_date' => '2083-09-09', 'slug' => 'christmas-day'],
+            ['title' => 'New Year', 'date' => '2083-01-01', 'slug' => 'new-year', 'is_holiday' => true],
+            ['title' => 'Buddha Jayanti', 'date' => '2083-01-18', 'slug' => 'buddha-jayanti', 'is_holiday' => true],
+            ['title' => 'Eid', 'date' => '2083-02-14', 'slug' => 'eid', 'is_holiday' => true],
+            ['title' => 'Ganatantra Diwas', 'date' => '2083-02-15', 'slug' => 'ganatantra-diwas', 'is_holiday' => true],
+            ['title' => 'Janai Purnima', 'date' => '2083-05-12', 'slug' => 'janai-purnima', 'is_holiday' => true],
+            ['title' => 'Krishna Janmasthami', 'date' => '2083-05-19', 'slug' => 'krishna-janmasthami', 'is_holiday' => true],
+            ['title' => 'Teej', 'date' => '2083-05-29', 'slug' => 'teej', 'is_holiday' => true],
+            ['title' => 'Indrajatra', 'date' => '2083-06-09', 'slug' => 'indra-jatra', 'is_holiday' => true],
+            ['title' => 'Maha Asthami', 'date' => '2083-07-01', 'slug' => 'maha-asthami', 'is_holiday' => true],
+            ['title' => 'Dashai Holiday', 'date' => '2083-07-02', 'slug' => 'dashai-holiday', 'is_holiday' => true],
+            ['title' => 'Maha Nabami', 'date' => '2083-07-03', 'slug' => 'maha-nabami', 'is_holiday' => true],
+            ['title' => 'Vijaya Dashami', 'date' => '2083-07-03', 'slug' => 'vijaya-dashami', 'is_holiday' => true],
+            ['title' => 'Dashai Holiday', 'date' => '2083-07-03', 'slug' => 'dashai-holiday', 'is_holiday' => true],
+            ['title' => 'Maha Shivaratri', 'date' => '2083-11-20', 'slug' => 'maha-shivaratri', 'is_holiday' => true],
+            ['title' => 'Holi', 'date' => '2083-12-07', 'slug' => 'holi', 'is_holiday' => true],
         ];
 
         // Insert public holidays
         foreach ($holidays as $holiday) {
-            DB::table('holidays')->insert($holiday);
+            DB::table('calendars')->insert($holiday);
         }
 
         // Insert Saturdays of 2083 BS
@@ -80,9 +85,9 @@ class PublicHolidaySeeder extends Seeder
 
         while ($start <= $end) {
             $nep_date = $this->convertEnglishToNepaliDate($start->format('Y-m-d'));
-            DB::table('holidays')->insert([
+            DB::table('calendars')->insert([
                 'title' => 'Saturday',
-                'nepali_date' => $nep_date,
+                'date' => $nep_date,
                 'slug' => 'saturday',
             ]);
             $start->modify('+7 days'); // Next Saturday

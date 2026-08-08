@@ -83,7 +83,7 @@ class UserController extends BackendBaseController implements HasMiddleware
             'status' => 200,
             'message' => 'User fetched successfully',
             'user' => $user,
-            'user_roles' => $user->roles()->pluck('name'),
+            // 'user_roles' => $user->roles()->pluck('name'),
             'roles' => Role::get()
         ]);
     }
@@ -196,4 +196,65 @@ class UserController extends BackendBaseController implements HasMiddleware
             'message' => $this->panel . ' deleted successfully !!'
         ]);
     }
+
+
+    public function userSearch(Request $request)
+    {
+
+        $search = $request->input('search');
+
+        $users = User::with('roles')
+            ->when($search, function ($query) use ($search) {
+                $query->where('name', 'like', '%' . $search . '%')
+                 ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhereHas('roles', function ($roleQuery) use ($search) {
+                        $roleQuery->where('name', 'like', '%' . $search . '%');
+                    });
+            })
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'users' => $users,
+        ]);
+    }
+
+    // public function userSearch(Request $request)
+    // {
+    //     $search = $request->input('search', '');
+
+    //     $users = User::where('name', 'like', "%{$search}%")
+    //         ->orWhere('email', 'like', "%{$search}%")
+    //         ->orWhere('phone', 'like', "%{$search}%")
+    //         ->latest()
+    //         ->get();
+
+    //     return response()->json([
+    //         'users' => $users,
+    //     ]);
+    // }
+
+    // public function userSearch(Request $request)
+    // {
+    //     $search = trim($request->input('search', ''));
+
+    //     $users = User::with('roles')
+    //         ->when($search !== '', function ($query) use ($search) {
+    //             $query->where(function ($q) use ($search) {
+    //                 $q->where('name', 'like', "%{$search}%")
+    //                     ->orWhere('email', 'like', "%{$search}%")
+    //                     ->orWhere('phone', 'like', "%{$search}%")
+    //                     ->orWhereHas('roles', function ($roleQuery) use ($search) {
+    //                         $roleQuery->where('name', 'like', "%{$search}%");
+    //                     });
+    //             });
+    //         })
+    //         ->latest()
+    //         ->get();
+
+    //     return response()->json([
+    //         'search' => $users,
+    //     ]);
+    // }
 }

@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('holidays', function (Blueprint $table) {
+        Schema::create('calendars', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->string('nepali_date'); // Store the date in Nepali (
+            $table->string('date'); // Store the date in Nepali (
             $table->string('slug');
+            $table->boolean('is_holiday')->default(true);
             $table->timestamps();
         });
     }
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('holidays');
+        Schema::dropIfExists('calendars');
     }
 };
