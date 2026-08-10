@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
 
         
-            $table->date('date');
+            $table->string('date');
             $table->unsignedBigInteger('staff_id');
             $table->time('check_in')->nullable();
             $table->time('check_out')->nullable();

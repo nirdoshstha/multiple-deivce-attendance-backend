@@ -15,6 +15,7 @@ use App\Http\Controllers\API\StaffController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\VendorController;
 use App\Http\Controllers\API\AttendanceController;
+use App\Http\Controllers\API\AttendanceLogController;
 use App\Http\Controllers\API\CalendarController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -53,14 +54,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('company-devices/restore/{id}', [CompanyDeviceController::class, 'restore'])->name('company_devices.restore');
     Route::delete('company-devices/permanent/{id}', [CompanyDeviceController::class, 'destroyPermanent'])->name('company_devices.delete_permanent');
 
-    // Staffs
+    // 
+    Route::get('/staffs/search', [StaffController::class, 'searchStaff'])->name('staffs.search');
     Route::apiResource('staffs', StaffController::class);
     Route::get('staffs/restore/{id}', [StaffController::class, 'restore'])->name('company_devices.restore');
     Route::delete('staffs/permanent/{id}', [StaffController::class, 'destroyPermanent'])->name('company_devices.delete_permanent');
 
     //Calendar
-    // Route::apiResource('calendar', CalendarController::class)->withoutMiddleware('auth.sanctum');
-    Route::any('calendar', [CalendarController::class, 'store'])->withoutMiddleware('auth:sanctum');
+    Route::apiResource('calendars', CalendarController::class);
+    // Route::any('calendar', [CalendarController::class, 'store'])->withoutMiddleware('auth:sanctum');
 
 
     // Attendances
@@ -71,6 +73,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Search By Month
     Route::get('/attendance/search-by-month', [AttendanceController::class, 'searchByMonth']);
+
+    //Attendance Logs
+    Route::apiResource('attendance-logs', AttendanceLogController::class);
+
 
     Route::apiResource('permissions', PermissionController::class);
     // Vendor 

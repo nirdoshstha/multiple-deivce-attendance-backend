@@ -50,9 +50,9 @@ class StaffController extends BackendBaseController
         //2nd method
         $user = auth()->user();
         if ($user->can('staffs.view.all')) {
-            $staffs = Staff::with('company', 'designation','user')->get();
+            $staffs = Staff::with('company', 'designation', 'user')->get();
         } else {
-            $staffs = Staff::with('company', 'designation','user')
+            $staffs = Staff::with('company', 'designation', 'user')
                 ->whereIn('company_id', $user->companies->pluck('id'))
                 ->get();
         }
@@ -250,8 +250,8 @@ class StaffController extends BackendBaseController
             $user->name = $request->name;
             $user->email = $request->email;
             $user->save();
- 
-             $user->syncRoles('Staff');
+
+            $user->syncRoles('Staff');
 
             // Update staff details (exclude image)
             $staff->update([
@@ -344,5 +344,27 @@ class StaffController extends BackendBaseController
                 'message' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function searchStaff(Request $request)
+    {
+        $search = $request->input('search');
+        $staffs = $this->model->with('company', 'designation')
+            ->when($search, function ($query) use ($search) {
+                $query->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            })
+            ->latest()
+            ->get();
+
+        $designations = Designation::get();
+        $companies = auth()->user()->companies;
+
+        return response()->json([
+            'staffs' => $staffs,
+            'designations' => $designations,
+            'companies' => $companies
+        ]);
     }
 }

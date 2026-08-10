@@ -5,73 +5,96 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Calendar;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
-class CalendarController extends Controller
+class CalendarController extends BackendBaseController
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    private $model;
+    protected $panel = "Holiday & Events Calendar";
+    // protected $img_path = 'uploads/staff/';
+
+    public function __construct()
     {
-        //
+        $this->model = new Calendar();
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function index(Request $request)
     {
-        //
-    }
+        $query = $this->model->query();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
+        if ($request->filled('year') && $request->filled('month')) {
+            $month = str_pad($request->month, 2, '0', STR_PAD_LEFT);
+            $query->where('date', 'like', "{$request->year}-{$month}-%");
+        } elseif ($request->filled('year')) {
+            $query->where('date', 'like', "{$request->year}-%");
+        }
 
-        $calendar = Calendar::create([
-            'title' => $request->title,
-            'date' => $request->date,
-            'slug' => 'holiday',
-            'is_holiday' => $request->holiday,
+        $calendars = $query->get()->map(fn($calendar) => [
+            'id' => $calendar->id,
+            'date' => $calendar->date,
+            'title' => $calendar->title,
+            'holiday' => (bool) $calendar->is_holiday,
         ]);
 
         return response()->json([
-            'message' => 'Calendar Event Stored Successfully ',
-            'status' => 200
+            'message' => 'Calendars fetched successfully',
+            'data' => $calendars,
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'title' => 'required|string',
+            'date' => 'required|string',
+            'title' => 'required',
+            'holiday' => 'nullable',
+        ]);
+
+        try {
+            $calendar = $this->model->create([
+                'title' => $validated['title'],
+                'date' => $validated['date'],
+                'slug' => Str::slug($validated['title']),
+                'is_holiday' => $validated['holiday'] ?? false,
+            ]);
+
+            return response()->json([
+                'message' => 'Calendar created successfully',
+                'data' => $validated + ['id' => $calendar->id],
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, Calendar $calendar)
     {
-        //
+        $validated = $request->validate([
+            'date' => 'required|string',
+            'title' => 'required',
+            'holiday' => 'nullable',
+        ]);
+
+        $calendar->update([
+            'title' => $validated['title'],
+            'date' => $validated['date'],
+            'is_holiday' => $validated['holiday'] ?? false,
+        ]);
+
+        return response()->json([
+            'message' => 'Calendar updated successfully',
+            'data' => $validated + ['id' => $calendar->id],
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(Calendar $calendar)
     {
-        //
-    }
+        $calendar->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json(['message' => 'Calendar deleted successfully']);
     }
 }

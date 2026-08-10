@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
+use App\Models\AttendanceLog;
 use App\Models\Calendar;
 use App\Models\Holiday;
 use App\Models\Staff;
@@ -114,8 +115,8 @@ class AttendanceController extends Controller
                     : now()->toDateString();
 
                 // Office timings
-                $officeTime = Carbon::parse($attendance['date'] . ' 09:00:00');
-                $officeExitTime = Carbon::parse($attendance['date'] . ' 17:00:00');
+                $officeTime = Carbon::parse($attendance['date'] . ' 09:00');
+                $officeExitTime = Carbon::parse($attendance['date'] . ' 17:00');
 
                 // Check In
                 $checkIn = !empty($attendance['check_in'])
@@ -155,7 +156,16 @@ class AttendanceController extends Controller
                     $workingMinutes = $checkIn->diffInMinutes($checkOut);
                 }
 
-                Attendance::updateOrCreate(
+                $record = Attendance::where(
+
+                    [
+                        'staff_id' => $attendance['staff_id'],
+                        'date' => $date,
+                    ]
+                )
+                    ->first();
+
+                $attendanceRecord = Attendance::updateOrCreate(
 
                     [
                         'staff_id' => $attendance['staff_id'],
@@ -175,8 +185,51 @@ class AttendanceController extends Controller
                         'updated_by' => auth()->id(),
                     ]
                 );
-            }
 
+                $changedFields = $attendanceRecord->getChanges();
+
+                $changedAttendance = collect($changedFields)
+                    ->only(['check_in', 'check_out'])
+                    ->toArray();
+
+                foreach ($changedAttendance as $field => $val) {
+                    AttendanceLog::create([
+                        'staff_id' => $attendance['staff_id'],
+                        'date' => $date,
+                        'punch_time' => $attendance[$field],
+                        'verification_type' => 'manual',
+                        'punch_type' => $field,
+
+                        'raw_data' => json_encode([
+                            'source' => 'web',
+                            'attendance_id' => $attendanceRecord->id,
+                        ]),
+
+                        'created_by' => auth()->id(),
+                    ]);
+                }
+
+
+                // Check In Log
+                // if ($record?->check_in != $attendanceRecord->check_in) {
+
+                //     AttendanceLog::create([
+                //         'staff_id' => $attendance['staff_id'],
+                //         'date' => $date,
+                //         'punch_time' => $attendance['check_in'],
+                //         'verification_type' => 'manual',
+                //         'punch_type' => 'check_in',
+
+                //         'raw_data' => json_encode([
+                //             'source' => 'web',
+                //             'attendance_id' => $attendanceRecord->id,
+                //         ]),
+
+                //         'created_by' => auth()->id(),
+                //     ]);
+                // }
+
+            }
             DB::commit();
 
             return response()->json([
