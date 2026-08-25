@@ -11,7 +11,10 @@ class Calendar extends Model
     protected $fillable = [
         'title',
         'date',
-        'slug',
-        'is_holiday'
+        'image',
+        'description',
+        'is_holiday',
+        'created_by',
+        'updated_by'
     ];
 }

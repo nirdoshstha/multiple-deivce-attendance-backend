@@ -52,28 +52,42 @@ class User extends Authenticatable
     }
 
 
-    // polymorphic many to many relation 
+    // polymorphic many to many relation
 
     // public function userable()
     // {
     //     return $this->morphTo();
     // }
 
+
     public function vendors()
     {
-        return $this->morphedByMany(Vendor::class, 'userable')->withPivot(['role'])
+        return $this->morphedByMany(
+            Vendor::class,
+            'userable',
+            'userables',
+            'user_id',
+            'userable_id'
+        )
+            ->withPivot('role')
             ->withTimestamps();
     }
 
     public function companies()
     {
-        return $this->morphedByMany(Company::class, 'userable')->withPivot(['role'])
+        return $this->morphedByMany(
+            Company::class,
+            'userable',
+            'userables',
+            'user_id',
+            'userable_id'
+        )
+            ->withPivot('role')
             ->withTimestamps();
     }
 
-    public function company(){
-        return $this->belongsTo(Staff::class, 'company_id','id');
+    public function company()
+    {
+        return $this->belongsTo(Staff::class, 'company_id', 'id');
     }
-
-     
 }

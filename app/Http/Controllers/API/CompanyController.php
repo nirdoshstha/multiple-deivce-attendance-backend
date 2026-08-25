@@ -23,7 +23,19 @@ class CompanyController extends BackendBaseController
     }
     public function index()
     {
-        $companys = $this->model->get();
+
+        // Super Admin can see all for this case
+        $user = auth()->user();
+
+        if ($user->hasRole('Super Admin')) {
+            $companys = $this->model->get();
+        } else {
+            $companys = $user->companies;
+        }
+
+
+
+        // $companys = $this->model->get();
         $trashed = $this->model->onlyTrashed()->count();
         $trashed_all = $this->model->onlyTrashed()->get();
 
@@ -76,8 +88,12 @@ class CompanyController extends BackendBaseController
             // Assign company role
             $user->assignRole('Company');
 
-            // 3. 
-            $user->companies()->attach($company->id, [
+            // 3.
+            auth()->user()->companies()->attach($company->id, [
+                'role' => 'Company',
+            ]);
+
+             $user->companies()->attach($company->id, [
                 'role' => 'Company',
             ]);
 

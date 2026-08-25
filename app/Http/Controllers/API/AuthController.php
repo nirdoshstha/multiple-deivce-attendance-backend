@@ -103,7 +103,7 @@ class AuthController extends BackendBaseController
         }
     }
 
-       
+
 
     public function updatePassword(Request $request, $id)
     {

@@ -11,7 +11,7 @@ class CalendarController extends BackendBaseController
 {
     private $model;
     protected $panel = "Holiday & Events Calendar";
-    // protected $img_path = 'uploads/staff/';
+    protected $img_path = 'uploads/calendar/';
 
     public function __construct()
     {
@@ -34,6 +34,8 @@ class CalendarController extends BackendBaseController
             'date' => $calendar->date,
             'title' => $calendar->title,
             'holiday' => (bool) $calendar->is_holiday,
+            'image' => $calendar->image ? asset($this->img_path . $calendar->image) : null,
+            'description' => $calendar->description
         ]);
 
         return response()->json([
@@ -49,26 +51,37 @@ class CalendarController extends BackendBaseController
             'date' => 'required|string',
             'title' => 'required',
             'holiday' => 'nullable',
+            'image' => 'nullable',
+            'description' => 'nullable'
         ]);
 
-        try {
-            $calendar = $this->model->create([
-                'title' => $validated['title'],
-                'date' => $validated['date'],
-                'slug' => Str::slug($validated['title']),
-                'is_holiday' => $validated['holiday'] ?? false,
-            ]);
 
-            return response()->json([
-                'message' => 'Calendar created successfully',
-                'data' => $validated + ['id' => $calendar->id],
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 500,
-                'message' => $e->getMessage()
-            ]);
+        if ($request->hasFile('image')) {
+            $image = $this->uploadImage($request->file('image'), 'calendar');
         }
+
+        if ($request)
+
+            try {
+                $calendar = $this->model->create([
+                    'title' => $validated['title'],
+                    'date' => $validated['date'],
+                    'is_holiday' => (bool) $validated['holiday'] ?? false,
+                    'image' => $image ?? null,
+                    'description' => $validated['description'] ?? null,
+                    'created_by' => auth('sanctum')->user()->id,
+                ]);
+
+                return response()->json([
+                    'message' => 'Calendar created successfully',
+                    'data' => $validated + ['id' => $calendar->id],
+                ], 201);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'status' => 500,
+                    'message' => $e->getMessage()
+                ]);
+            }
     }
 
     public function update(Request $request, Calendar $calendar)
@@ -77,12 +90,22 @@ class CalendarController extends BackendBaseController
             'date' => 'required|string',
             'title' => 'required',
             'holiday' => 'nullable',
+            'image' => 'nullable',
+            'description' => 'nullable'
         ]);
+
+        if ($request->hasFile('image')) {
+            $this->deleteImage($calendar->image);
+            $image = $this->uploadImage($request->file('image'), 'calendar');
+        }
 
         $calendar->update([
             'title' => $validated['title'],
             'date' => $validated['date'],
-            'is_holiday' => $validated['holiday'] ?? false,
+            'is_holiday' => (bool) $validated['holiday'] ?? false,
+            'image' => $image ?? $calendar->image,
+            'description' => $validated['description'] ?? null,
+            'updated_by' => auth('sanctum')->user()->id,
         ]);
 
         return response()->json([
@@ -93,6 +116,10 @@ class CalendarController extends BackendBaseController
 
     public function destroy(Calendar $calendar)
     {
+        if ($calendar->image) {
+            $this->deleteImage($calendar->image);
+        }
+
         $calendar->delete();
 
         return response()->json(['message' => 'Calendar deleted successfully']);

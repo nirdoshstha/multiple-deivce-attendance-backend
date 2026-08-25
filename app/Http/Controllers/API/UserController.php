@@ -206,8 +206,8 @@ class UserController extends BackendBaseController implements HasMiddleware
         $users = User::with('roles')
             ->when($search, function ($query) use ($search) {
                 $query->where('name', 'like', '%' . $search . '%')
-                 ->orWhere('email', 'like', "%{$search}%")
-                ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
                     ->orWhereHas('roles', function ($roleQuery) use ($search) {
                         $roleQuery->where('name', 'like', '%' . $search . '%');
                     });
@@ -220,41 +220,44 @@ class UserController extends BackendBaseController implements HasMiddleware
         ]);
     }
 
-    // public function userSearch(Request $request)
-    // {
-    //     $search = $request->input('search', '');
+    public function superAdminCan(Request $request)
+    {
+        $request->validate([
+            'userId' => 'required|integer|exists:users,id',
+        ]);
 
-    //     $users = User::where('name', 'like', "%{$search}%")
-    //         ->orWhere('email', 'like', "%{$search}%")
-    //         ->orWhere('phone', 'like', "%{$search}%")
-    //         ->latest()
-    //         ->get();
+        // Current logged-in user
+        $superAdmin = $request->user();
 
-    //     return response()->json([
-    //         'users' => $users,
-    //     ]);
-    // }
+        // Make sure only Super Admin can use this feature
+        if (!$superAdmin || !$superAdmin->hasRole('Super Admin')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Only Super Admin can access another user dashboard.',
+            ], 403);
+        }
 
-    // public function userSearch(Request $request)
-    // {
-    //     $search = trim($request->input('search', ''));
+        // Find target user
+        $user = User::find($request->userId);
 
-    //     $users = User::with('roles')
-    //         ->when($search !== '', function ($query) use ($search) {
-    //             $query->where(function ($q) use ($search) {
-    //                 $q->where('name', 'like', "%{$search}%")
-    //                     ->orWhere('email', 'like', "%{$search}%")
-    //                     ->orWhere('phone', 'like', "%{$search}%")
-    //                     ->orWhereHas('roles', function ($roleQuery) use ($search) {
-    //                         $roleQuery->where('name', 'like', "%{$search}%");
-    //                     });
-    //             });
-    //         })
-    //         ->latest()
-    //         ->get();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found.',
+            ], 404);
+        }
 
-    //     return response()->json([
-    //         'search' => $users,
-    //     ]);
-    // }
+
+
+
+        // Create a temporary token for the target user
+        $token = $user->createToken('impersonation', ['impersonate'])->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Successfully switched to user dashboard.',
+            'token' => $token,
+            'user' => $user,
+        ]);
+    }
 }

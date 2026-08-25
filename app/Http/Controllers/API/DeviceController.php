@@ -20,7 +20,7 @@ class DeviceController extends BackendBaseController
     }
     public function index()
     {
-        $devices = Device::get();
+        $devices = Device::with('device_brand')->get();
         $device_brand = DeviceBrand::get();
         return response()->json([
             'status' => 200,
@@ -72,7 +72,7 @@ class DeviceController extends BackendBaseController
     public function show(string $id)
     {
         $device = $this->model->findOrFail($id);
-         $brands = DeviceBrand::get();
+        $brands = DeviceBrand::get();
         return response()->json([
             'status' => 200,
             'device' => $device,

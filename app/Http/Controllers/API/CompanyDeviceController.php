@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\CompanyDevice;
 use App\Models\Device;
+use App\Models\DeviceBrand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -22,52 +23,74 @@ class CompanyDeviceController extends BackendBaseController
         $this->model = new CompanyDevice();
     }
     public function index()
-    {
-        // $devices = $this->model->get();
-        // return response()->json([
-        //     'status' => 200,
-        //     'message' => $this->panel . ' Fetched Successfully',
-        //     'devices' => $devices
-        // ]);
+    { $user = auth()->user();
 
+        // $devices = $this->model->with('brand', 'company')->get();
+        $device_brand = DeviceBrand::get(); 
+        $device_name = Device::get();
+        $companies = $user->companies;
 
-        $response = Http::get('https://jsonplaceholder.typicode.com/users');
+       
 
+        // Super Admin can see all for this case
+        
+        if ($user->hasRole('Super Admin')) {
 
-        if ($response) {
-            foreach ($response->json() as $device) {
-                CompanyDevice::updateOrCreate(
-                    ['ip' => $device['email']],
-                    [
-                        'name' => $device['name'],
-                        'company_id' => '1',
-                        'device_brand_id' => '2',
-                        'device_id' => '3',
-                        'serial_no' => '12345',
-                        'port' => '8080',
-                        'api_key' => '789',
-                        'device_code' => $device['username'],
-                        'api_url' => $device['website'],
-                        'ip' => $device['email'],
-                        'created_by' => auth('sanctum')->user()->id
-                    ]
-                );
-            }
-            $devices = $this->model->get();
-            $trashed = $this->model->onlyTrashed()->count();
-            $trashed_all  = $this->model->onlyTrashed()->get();
-            return response()->json([
-                'status' => 200,
-                'message' => 'Users Imported Successfully',
-                'devices' => $devices,
-                'trashed' => $trashed,
-                'trashed_all' => $trashed_all
-            ]);
+            $devices = $this->model
+                ->with(['device', 'brand', 'company'])
+                ->get();
+
+        } else {
+
+             $devices = CompanyDevice::with(['device', 'brand', 'company'])
+            ->whereIn('company_id', $user->companies()->pluck('companies.id'))
+            ->get();
         }
         return response()->json([
-            'status' => 500,
-            'message' => 'API Error'
+            'status' => 200,
+            'message' => $this->panel . ' Fetched Successfully',
+            'devices' => $devices,
+            'device_name' => $device_name,
+            'device_brand' => $device_brand,
+            'companies' => $companies
         ]);
+
+
+        // $response = Http::get('https://jsonplaceholder.typicode.com/users');
+        // if ($response) {
+        //     foreach ($response->json() as $device) {
+        //         CompanyDevice::updateOrCreate(
+        //             ['ip' => $device['email']],
+        //             [
+        //                 'name' => $device['name'],
+        //                 'company_id' => '1',
+        //                 'device_brand_id' => '2',
+        //                 'device_id' => '3',
+        //                 'serial_no' => '12345',
+        //                 'port' => '8080',
+        //                 'api_key' => '789',
+        //                 'device_code' => $device['username'],
+        //                 'api_url' => $device['website'],
+        //                 'ip' => $device['email'],
+        //                 'created_by' => auth('sanctum')->user()->id
+        //             ]
+        //         );
+        //     }
+        //     $devices = $this->model->get();
+        //     $trashed = $this->model->onlyTrashed()->count();
+        //     $trashed_all  = $this->model->onlyTrashed()->get();
+        //     return response()->json([
+        //         'status' => 200,
+        //         'message' => 'Users Imported Successfully',
+        //         'devices' => $devices,
+        //         'trashed' => $trashed,
+        //         'trashed_all' => $trashed_all
+        //     ]);
+        // }
+        // return response()->json([
+        //     'status' => 500,
+        //     'message' => 'API Error'
+        // ]);
     }
 
     /**
@@ -83,8 +106,12 @@ class CompanyDeviceController extends BackendBaseController
      */
     public function store(Request $request)
     {
+
         $request->validate([
             'name' => 'required',
+            'company_id' => 'required',
+            'device_id' => 'required',
+            'serial_no' => 'required'
         ]);
 
         $data = $request->all();
@@ -208,4 +235,14 @@ class CompanyDeviceController extends BackendBaseController
             ], 500);
         }
     }
+
+    public function getDevicesByBrand(Request $request)
+{
+    $devices = Device::where('device_brand_id', $request->device_brand_id) 
+        ->get(['id', 'name', 'device_brand_id']);
+
+    return response()->json([
+        'devices' => $devices
+    ]);
+}
 }

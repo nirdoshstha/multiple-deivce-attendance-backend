@@ -15,16 +15,16 @@ return new class extends Migration
             $table->id();
 
             $table->string('name');
-            $table->bigInteger('company_id');
-            $table->bigInteger('device_brand_id');
-            $table->bigInteger('device_id');
-            $table->bigInteger('serial_no');
-            $table->bigInteger('port');
-            $table->bigInteger('api_key');
+            $table->foreignId('company_id')->constrained('companies');
+            $table->foreignId('device_brand_id')->constrained('device_brands');
+            $table->foreignId('device_id')->constrained('devices');
+            $table->string('serial_no');
+            $table->bigInteger('port')->nullable();
+            $table->bigInteger('api_key')->nullable();
 
-            $table->string('device_code');
-            $table->string('api_url');
-            $table->string('ip');
+            $table->string('device_code')->nullable();
+            $table->string('api_url')->nullable();
+            $table->string('ip')->nullable();
 
             $table->boolean('status')->default(0);
             $table->foreignId('created_by')->constrained('users');

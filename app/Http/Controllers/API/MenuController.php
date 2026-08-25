@@ -3,27 +3,29 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\DeviceBrand;
+use App\Models\Menu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
-class DeviceBrandController extends BackendBaseController
+class MenuController extends BackendBaseController
 {
 
     private $model;
-    protected $panel = "Device Brand";
+    protected $panel = "Menus ";
 
     public function __construct()
     {
-        $this->model = new DeviceBrand();
+        $this->model = new Menu();
     }
     public function index()
     {
-        $brands = $this->model->get();
+        $menus = $this->model->with('parent')->orderBy('rank')->get();
+        $category = $this->model->with('subCategories')->where('parent_id', null)->orderBy('rank')->get();
         return response()->json([
             'status' => 200,
             'message' => $this->panel . ' Fetched Successfully',
-            'brands' => $brands
+            'menus' => $menus,
+            'category' => $category
         ]);
     }
 
@@ -44,10 +46,14 @@ class DeviceBrandController extends BackendBaseController
             'name' => 'required',
         ]);
 
-        $brand = $this->model->create([
+        $menu = $this->model->create([
             'name' => $request->name,
+            'parent_id' => $request->parent_id,
+            'display_name' => $request->display_name,
             'slug' => Str::slug($request->name),
-            'website' => $request->website,
+            'rank' => $request->rank,
+            'icon' => $request->icon,
+            'route' => $request->route,
             'created_by' => auth('sanctum')->user()->id,
         ]);
 
@@ -67,10 +73,12 @@ class DeviceBrandController extends BackendBaseController
      */
     public function show(string $id)
     {
-        $brand = $this->model->findOrFail($id);
+        $menu = $this->model->findOrFail($id);
+        $menus = $this->model->with('parent')->whereNull('parent_id')->get();
         return response()->json([
             'status' => 200,
-            'brand' => $brand
+            'menu' => $menu,
+            'menus' => $menus
         ]);
     }
 
@@ -91,15 +99,18 @@ class DeviceBrandController extends BackendBaseController
             'name' => 'required|string|max:155'
         ]);
 
-        $brand = $this->model->findOrFail($id);
-        $name = $brand->name;
+        $menu = $this->model->findOrFail($id);
+        $name = $menu->name;
 
         $data = $request->all();
 
-        $brand->update([
+        $menu->update([
             'name' => $request->name,
-            'slug' => Str::slug($request->name),
-            'website' => $request->website,
+            'slug' => Str::slug($request->title),
+            'route' => $request->route,
+            'rank' => $request->rank,
+            'icon' => $request->icon, 
+            'parent_id' => $request->parent_id, 
             'updated_by' => auth('sanctum')->user()->id,
         ]);
 
@@ -114,11 +125,11 @@ class DeviceBrandController extends BackendBaseController
      */
     public function destroy(string $id)
     {
-        $brand = $this->model->findOrFail($id);
+        $menu = $this->model->findOrFail($id);
 
-        $name = $brand->name;
+        $name = $menu->name;
 
-        $brand->delete();
+        $menu->delete();
 
         return response()->json([
             'status' => 200,

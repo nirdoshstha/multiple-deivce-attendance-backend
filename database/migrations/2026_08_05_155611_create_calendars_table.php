@@ -15,8 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('date'); // Store the date in Nepali (
-            $table->string('slug');
+            $table->string('image')->nullable();
+            $table->mediumText('description')->nullable();
             $table->boolean('is_holiday')->default(true);
+            $table->foreignId('created_by')->constrained('users');
+            $table->foreignId('updated_by')->nullable()->constrained('users');
             $table->timestamps();
         });
     }

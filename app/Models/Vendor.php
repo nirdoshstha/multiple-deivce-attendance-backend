@@ -26,7 +26,13 @@ class Vendor extends Model
 
     public function users()
     {
-        return $this->morphToMany(User::class, 'userable')
+        return $this->morphToMany(
+            User::class,
+            'userable',
+            'userables',
+            'userable_id',
+            'user_id'
+        )
             ->withPivot('role')
             ->withTimestamps();
     }

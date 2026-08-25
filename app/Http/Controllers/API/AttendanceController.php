@@ -72,16 +72,16 @@ class AttendanceController extends Controller
     // }
 
 
-    public function index()
-    {
-        $holidays = Holiday::whereMonth('date', $month)
-            ->whereYear('date', $year)
-            ->get();
+    // public function index()
+    // {
+    //     $holidays = Holiday::whereMonth('date', $month)
+    //         ->whereYear('date', $year)
+    //         ->get();
 
-        return response()->json([
-            'holidays' => $holidays,
-        ]);
-    }
+    //     return response()->json([
+    //         'holidays' => $holidays,
+    //     ]);
+    // }
 
     public function create()
     {

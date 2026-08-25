@@ -26,8 +26,19 @@ class CompanyDevice extends BackendBaseModel
         'updated_by'
     ];
 
-    // public function deviceBrand()
-    // {
-    //     return $this->belongsTo(DeviceBrand::class, 'device_brand_id', 'id');
-    // }
+
+     public function device()
+    {
+        return $this->belongsTo(Device::class, 'device_brand_id', 'id');
+    }
+
+    public function brand()
+    {
+        return $this->belongsTo(DeviceBrand::class, 'device_brand_id', 'id');
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'company_id', 'id');
+    }
 }

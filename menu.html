@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dynamic Backend Menu</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      color: #1f2937;
+    }
+
+    .menu {
+      width: 280px;
+      margin: 40px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .menu-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .menu-item {
+      border-bottom: 1px solid #eee;
+    }
+
+    .menu-item:last-child {
+      border-bottom: 0;
+    }
+
+    .menu-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 12px 16px;
+      border: 0;
+      background: transparent;
+      color: #374151;
+      text-decoration: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .menu-link:hover {
+      background: #f3f4f6;
+      color: #2563eb;
+    }
+
+    /* Parent items */
+    .has-children > .menu-link {
+      font-weight: 600;
+    }
+
+    .arrow {
+      transition: transform 0.2s ease;
+      font-size: 12px;
+    }
+
+    .has-children.open > .menu-link .arrow {
+      transform: rotate(90deg);
+    }
+
+    /* Child menu */
+    .submenu {
+      display: none;
+      list-style: none;
+      margin: 0;
+      padding: 0 0 0 18px;
+      background: #fafafa;
+    }
+
+    .has-children.open > .submenu {
+      display: block;
+    }
+
+    .submenu .menu-link {
+      font-size: 14px;
+      padding: 10px 16px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="menu" aria-label="Main navigation">
+    <!--
+      Backend integration point:
+      The server can render this <ul> recursively from database records.
+
+      Example relationship:
+      id | parent_id | title       | url
+      1  | null      | Products    | #
+      2  | 1         | Laptops      | /laptops
+      3  | 1         | Phones       | /phones
+      4  | 2         | Gaming      | /gaming-laptops
+    -->
+
+    <ul class="menu-list" id="menuRoot">
+      <!-- JavaScript inserts dynamically generated menu items here -->
+    </ul>
+  </nav>
+
+  <script>
+    /*
+      In a backend application, replace this example with data returned
+      from your API, database query, or server-side template.
+
+      For example:
+        const menuData = await fetch('/api/menu').then(res => res.json());
+    */
+
+    const menuData = [
+      {
+        title: "Dashboard",
+        url: "/dashboard"
+      },
+      {
+        title: "Products",
+        url: "#",
+        children: [
+          {
+            title: "Laptops",
+            url: "#",
+            children: [
+              {
+                title: "Gaming Laptops",
+                url: "/products/laptops/gaming"
+              },
+              {
+                title: "Business Laptops",
+                url: "/products/laptops/business"
+              }
+            ]
+          },
+          {
+            title: "Phones",
+            url: "/products/phones"
+          }
+        ]
+      },
+      {
+        title: "Orders",
+        url: "/orders"
+      },
+      {
+        title: "Settings",
+        url: "#",
+        children: [
+          {
+            title: "Users",
+            url: "/settings/users"
+          },
+          {
+            title: "Permissions",
+            url: "/settings/permissions"
+          }
+        ]
+      }
+    ];
+
+    /**
+     * Recursively renders any number of menu levels.
+     */
+    function renderMenu(items) {
+      const ul = document.createElement("ul");
+      ul.className = "menu-list";
+
+      items.forEach(item => {
+        const li = document.createElement("li");
+        li.className = "menu-item";
+
+        const hasChildren =
+          Array.isArray(item.children) && item.children.length > 0;
+
+        if (hasChildren) {
+          li.classList.add("has-children");
+        }
+
+        // Parent/child link
+        const link = document.createElement("a");
+        link.className = "menu-link";
+        link.href = item.url || "#";
+
+        const label = document.createElement("span");
+        label.textContent = item.title;
+
+        link.appendChild(label);
+
+        if (hasChildren) {
+          const arrow = document.createElement("span");
+          arrow.className = "arrow";
+          arrow.textContent = "▶";
+          link.appendChild(arrow);
+
+          /*
+            Prevent navigation for expandable parent items.
+            Remove this if parent items should also be clickable.
+          */
+          link.addEventListener("click", function (event) {
+            if (item.url === "#") {
+              event.preventDefault();
+            }
+
+            li.classList.toggle("open");
+          });
+        }
+
+        li.appendChild(link);
+
+        // Recursively render children
+        if (hasChildren) {
+          const childMenu = renderMenu(item.children);
+          childMenu.classList.add("submenu");
+          li.appendChild(childMenu);
+        }
+
+        ul.appendChild(li);
+      });
+
+      return ul;
+    }
+
+    // Render backend data into the menu
+    const menuRoot = document.getElementById("menuRoot");
+    menuRoot.replaceWith(renderMenu(menuData));
+  </script>
+
+</body>
+</html>

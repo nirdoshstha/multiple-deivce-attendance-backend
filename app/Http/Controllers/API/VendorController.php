@@ -197,7 +197,7 @@ class VendorController extends BackendBaseController
             $vendor->users()->detach();
 
             // Delete vendor
-            $vendor->delete();
+            $vendor->forceDelete();
 
             DB::commit();
 

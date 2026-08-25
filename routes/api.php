@@ -17,6 +17,9 @@ use App\Http\Controllers\API\VendorController;
 use App\Http\Controllers\API\AttendanceController;
 use App\Http\Controllers\API\AttendanceLogController;
 use App\Http\Controllers\API\CalendarController;
+use App\Http\Controllers\API\LeaveApplicationController;
+use App\Http\Controllers\API\MenuController;
+use App\Http\Controllers\API\LeaveTypeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -40,8 +43,17 @@ Route::post('/login', [AuthController::class, 'login'])->name('user.login');
 
 Route::middleware('auth:sanctum')->group(function () {
 
+
+    Route::apiResource('menus', MenuController::class);
+
+    Route::apiResource('leave-types', LeaveTypeController::class);
+    Route::apiResource('leave-applications', LeaveApplicationController::class);
+
     Route::get('users/search', [UserController::class, 'userSearch'])->name('users.search');
     Route::apiResource('users', UserController::class);
+
+    Route::get('/devices/by-brand', [CompanyDeviceController::class, 'getDevicesByBrand']);
+    Route::post('superadmin-can-go-any-dashboard', [UserController::class, 'superAdminCan']);
 
     Route::apiResource('roles', RoleController::class);
     Route::apiResource('genders', GenderController::class);
@@ -54,14 +66,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('company-devices/restore/{id}', [CompanyDeviceController::class, 'restore'])->name('company_devices.restore');
     Route::delete('company-devices/permanent/{id}', [CompanyDeviceController::class, 'destroyPermanent'])->name('company_devices.delete_permanent');
 
-    // 
+    //
     Route::get('/staffs/search', [StaffController::class, 'searchStaff'])->name('staffs.search');
     Route::apiResource('staffs', StaffController::class);
     Route::get('staffs/restore/{id}', [StaffController::class, 'restore'])->name('company_devices.restore');
     Route::delete('staffs/permanent/{id}', [StaffController::class, 'destroyPermanent'])->name('company_devices.delete_permanent');
 
     //Calendar
-    Route::apiResource('calendars', CalendarController::class);
+    Route::apiResource('calendars', CalendarController::class)->withoutMiddleware('auth:sanctum');
     // Route::any('calendar', [CalendarController::class, 'store'])->withoutMiddleware('auth:sanctum');
 
 
@@ -79,12 +91,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::apiResource('permissions', PermissionController::class);
-    // Vendor 
+    // Vendor
     Route::apiResource('vendors', VendorController::class);
     Route::get('vendors/restore/{id}', [VendorController::class, 'restore'])->name('vendor.restore');
     Route::delete('vendors/destroy/{id}', [VendorController::class, 'destroyPermanent'])->name('vendor.delete_permanent');
 
-    // Company 
+    // Company
     Route::apiResource('companys', CompanyController::class);
     Route::get('companys/restore/{id}', [CompanyController::class, 'restore'])->name('company.restore');
     Route::delete('companys/destroy/{id}', [CompanyController::class, 'destroyPermanent'])->name('company.delete_permanent');
