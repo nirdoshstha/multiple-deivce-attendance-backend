@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Permission;
 
 class MenuController extends BackendBaseController
 {
@@ -20,12 +21,24 @@ class MenuController extends BackendBaseController
     public function index()
     {
         $menus = $this->model->with('parent')->orderBy('rank')->get();
-        $category = $this->model->with('subCategories')->where('parent_id', null)->orderBy('rank')->get();
+        $permissions = Permission::orderBy('name')->get();
+        // $category = $this->model->with('subCategories')->where('parent_id', null)->orderBy('rank')->get();
+        $category = Menu::with([
+            'permission',
+            'subCategories.permission',
+            'subCategories.subCategories.permission'
+        ])
+            ->whereNull('parent_id')
+            ->where('status', 1)
+            ->orderBy('rank')
+            ->get();
+
         return response()->json([
             'status' => 200,
             'message' => $this->panel . ' Fetched Successfully',
             'menus' => $menus,
-            'category' => $category
+            'category' => $category,
+            'permissions' => $permissions
         ]);
     }
 
@@ -48,6 +61,7 @@ class MenuController extends BackendBaseController
 
         $menu = $this->model->create([
             'name' => $request->name,
+            'permission_id' => $request->permission_id,
             'parent_id' => $request->parent_id,
             'display_name' => $request->display_name,
             'slug' => Str::slug($request->name),
@@ -109,8 +123,8 @@ class MenuController extends BackendBaseController
             'slug' => Str::slug($request->title),
             'route' => $request->route,
             'rank' => $request->rank,
-            'icon' => $request->icon, 
-            'parent_id' => $request->parent_id, 
+            'icon' => $request->icon,
+            'parent_id' => $request->parent_id,
             'updated_by' => auth('sanctum')->user()->id,
         ]);
 

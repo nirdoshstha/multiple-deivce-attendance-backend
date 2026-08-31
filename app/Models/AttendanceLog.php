@@ -28,4 +28,9 @@ class AttendanceLog extends BackendBaseModel
     {
         return $this->belongsTo(Staff::class, 'staff_id', 'id');
     }
+
+    public function companyDevice()
+    {
+        return $this->belongsTo(CompanyDevice::class);
+    }
 }

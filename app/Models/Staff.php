@@ -45,4 +45,12 @@ class Staff extends BackendBaseModel
     public function user(){
         return $this->belongsTo(User::class,'user_id','id');
     }
+
+   public function leaves() {
+    return $this->hasMany(LeaveApplication::class, 'user_id', 'user_id');
+    }
+    public function leave_type()
+        {
+            return $this->belongsTo(LeaveType::class, 'leave_type_id', 'id');
+        }
 }

@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
+use App\Services\FingerprintDeviceService;
+use Illuminate\Http\JsonResponse;
+use Throwable;
+
 class CompanyDeviceController extends BackendBaseController
 {
 
@@ -22,18 +26,20 @@ class CompanyDeviceController extends BackendBaseController
     {
         $this->model = new CompanyDevice();
     }
+
+    
     public function index()
     { $user = auth()->user();
 
         // $devices = $this->model->with('brand', 'company')->get();
-        $device_brand = DeviceBrand::get(); 
+        $device_brand = DeviceBrand::get();
         $device_name = Device::get();
         $companies = $user->companies;
 
-       
+
 
         // Super Admin can see all for this case
-        
+
         if ($user->hasRole('Super Admin')) {
 
             $devices = $this->model
@@ -238,11 +244,52 @@ class CompanyDeviceController extends BackendBaseController
 
     public function getDevicesByBrand(Request $request)
 {
-    $devices = Device::where('device_brand_id', $request->device_brand_id) 
+    $devices = Device::where('device_brand_id', $request->device_brand_id)
         ->get(['id', 'name', 'device_brand_id']);
 
     return response()->json([
         'devices' => $devices
     ]);
 }
+
+
+
+ // POST /api/company-devices/{companyDevice}/check-connection
+    // A lightweight ping: connect + verify serial number, no data pulled.
+    public function checkConnection(CompanyDevice $companyDevice): JsonResponse
+    {
+        $service = new FingerprintDeviceService($companyDevice);
+
+        try {
+            $service->connect();
+            $service->disconnect();
+
+            return response()->json([
+                'status' => 'online',
+                'serial_no' => $companyDevice->serial_no,
+            ]);
+        } catch (Throwable $e) {
+            return response()->json([
+                'status' => 'offline',
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    // POST /api/company-devices/{companyDevice}/sync
+    public function sync(CompanyDevice $companyDevice): JsonResponse
+    {
+        try {
+            $summary = (new FingerprintDeviceService($companyDevice))->sync();
+
+            return response()->json(['data' => $summary]);
+        } catch (Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'message' => 'Sync failed: '.$e->getMessage(),
+            ], 422);
+        }
+    }
+
 }

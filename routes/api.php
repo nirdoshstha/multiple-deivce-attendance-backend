@@ -53,6 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('users', UserController::class);
 
     Route::get('/devices/by-brand', [CompanyDeviceController::class, 'getDevicesByBrand']);
+
     Route::post('superadmin-can-go-any-dashboard', [UserController::class, 'superAdminCan']);
 
     Route::apiResource('roles', RoleController::class);
@@ -65,6 +66,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('company-devices', CompanyDeviceController::class);
     Route::get('company-devices/restore/{id}', [CompanyDeviceController::class, 'restore'])->name('company_devices.restore');
     Route::delete('company-devices/permanent/{id}', [CompanyDeviceController::class, 'destroyPermanent'])->name('company_devices.delete_permanent');
+
+    //Company Device connection and sync
+    Route::post('/company-devices/{companyDevice}/check-connection', [CompanyDeviceController::class, 'checkConnection']);
+    Route::post('/company-devices/{companyDevice}/sync', [CompanyDeviceController::class, 'sync']);
 
     //
     Route::get('/staffs/search', [StaffController::class, 'searchStaff'])->name('staffs.search');

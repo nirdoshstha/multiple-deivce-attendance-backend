@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignId('device_id')->constrained('devices');
             $table->string('serial_no');
             $table->bigInteger('port')->nullable();
-            $table->bigInteger('api_key')->nullable();
+            $table->string('api_key')->nullable();
 
             $table->string('device_code')->nullable();
             $table->string('api_url')->nullable();

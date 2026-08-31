@@ -27,7 +27,19 @@ class CompanyDevice extends BackendBaseModel
     ];
 
 
-     public function device()
+     // 'encrypted' transparently encrypts on save and decrypts on read, so the
+    // credential never sits in the database (or in a backup/dump) as plain
+    // text. Requires APP_KEY to be set, which Laravel needs anyway.
+    protected $casts = [
+        'api_key' => 'encrypted',
+    ];
+
+    // Never let api_key leak into API responses / debug output by accident.
+    protected $hidden = [
+        'api_key',
+    ];
+
+    public function device()
     {
         return $this->belongsTo(Device::class, 'device_brand_id', 'id');
     }
@@ -40,5 +52,15 @@ class CompanyDevice extends BackendBaseModel
     public function company()
     {
         return $this->belongsTo(Company::class, 'company_id', 'id');
+    }
+
+    public function staffLinks()
+    {
+        return $this->hasMany(DeviceStaffLink::class);
+    }
+
+    public function attendanceLogs()
+    {
+        return $this->hasMany(DeviceAttendanceLog::class);
     }
 }

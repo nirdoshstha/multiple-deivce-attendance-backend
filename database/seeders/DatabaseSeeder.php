@@ -29,8 +29,9 @@ class DatabaseSeeder extends Seeder
             DeviceBrandSeeder::class,
             DeviceSeeder::class,
             // CompanyDeviceSeeder::class,
+            VendorSeeder::class,
 
-            
+
 
         ]);
 

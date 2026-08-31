@@ -7,6 +7,7 @@ use App\Models\Attendance;
 use App\Models\AttendanceLog;
 use App\Models\Calendar;
 use App\Models\Holiday;
+use App\Models\LeaveApplication;
 use App\Models\Staff;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -304,7 +305,7 @@ class AttendanceController extends Controller
     //         'status' => 200,
     //         'staffs' => $staffs
     //     ]);
-    // } 
+    // }
 
     // public function searchByDate(Request $request)
     // {
@@ -341,7 +342,7 @@ class AttendanceController extends Controller
 
     //     return response()->json([
     //         'status' => 200,
-    //         'staffs' => $staffs, 
+    //         'staffs' => $staffs,
     //         'holidays' => $holidays,
     //     ]);
     // }
@@ -356,6 +357,12 @@ class AttendanceController extends Controller
         $query = Staff::with([
             'company',
             'designation',
+            'leaves' => function ($q) use ($request, $month) { //HasMany relationship for LeaveApplication of Staff so..
+            // Any leave that overlaps this month *** leave_type belongs relationship.
+            $q->with('leave_type')->where('is_approved', 1) // drop this line if you want all statuses
+              ->where('date_from', '<=', $request->year . '-' . $month . '-31')
+              ->where('date_to', '>=', $request->year . '-' . $month . '-01');
+            },
             'attendances' => function ($q) use ($request) {
 
                 // Daily Search
@@ -382,6 +389,7 @@ class AttendanceController extends Controller
 
         $staffs = $query->get();
 
+
         // $totalDays = 32; // Get this from your BS calendar library
         // $days = range(1, $totalDays);
         // $month = str_pad($request->month, 2, '0', STR_PAD_LEFT);
@@ -399,13 +407,15 @@ class AttendanceController extends Controller
             ->where('date', $request->date)
             ->exists();
 
+
+
         return response()->json([
             'status' => 200,
             'staffs' => $staffs,
             'date' => $request->date,
             'days' => $days,
             'holidays' => $holidays,
-            'disabled' => $holiday_date
+            'disabled' => $holiday_date,
         ]);
     }
 }

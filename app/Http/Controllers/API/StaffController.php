@@ -95,7 +95,7 @@ class StaffController extends BackendBaseController
             $data = $request->except('image', 'created_by', 'updated_by');
 
             if ($request->hasFile('image')) {
-                $data['image'] = $this->uploadImage($request->file('image'), 'staff');
+                $data['image'] = $this->uploadImage($request->file('image'), 'user');
             }
 
 
@@ -103,7 +103,8 @@ class StaffController extends BackendBaseController
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => Hash::make('12345')
+                'password' => Hash::make('12345'),
+                'image'    => $data['image'] ?? null,
             ]);
 
             $user->assignRole('Staff');
@@ -112,7 +113,7 @@ class StaffController extends BackendBaseController
             $staff = $this->model->create($data + [
                 'name'            => $request->name,
                 'email'           => $request->email,
-                // 'image'           => $data['image'] ?? null,
+                //  'image'           => $data['image'] ?? null,
                 'gender'          => $request->gender,
                 'phone'           => $request->phone,
                 'designation_id'  => $request->designation_id,
@@ -327,11 +328,11 @@ class StaffController extends BackendBaseController
 
             $title = $staff->title;
 
-            // $user_id = $staff->user_id;
-            // $user = User::where('id', $user_id)->first();
+            $user_id = $staff->user_id;
+            $user = User::where('id', $user_id)->first();
 
+             $user->delete();
             $staff->forceDelete();
-            // $user->delete();
 
 
             return response()->json([

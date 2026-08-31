@@ -40,4 +40,9 @@ class LeaveApplication extends Model
     {
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
+
+    public function leave_type()
+    {
+        return $this->belongsTo(LeaveType::class, 'leave_type_id', 'id');
+    }
 }
