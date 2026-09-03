@@ -12,13 +12,15 @@ use Illuminate\Routing\Controllers\Middleware;
 class SettingController extends BackendBaseController implements HasMiddleware
 {
 
+
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:settings.show', only: ['settings.show']),
-            new Middleware('permission:settings.store', only: ['settings.store']),
+            new Middleware('permission:settings.show', only: ['show']),
+            new Middleware('permission:settings.store', only: ['store']),
         ];
     }
+
 
     private $model;
     protected $panel = 'Setting';
@@ -32,10 +34,15 @@ class SettingController extends BackendBaseController implements HasMiddleware
         $this->model = $model;
     }
 
+    public function index()
+    {
+        return response()->json([
+            'setting' => Setting::first()
+        ]);
+    }
+
     public function store(Request $request)
     {
-
-
         $request->validate([
             'logo' => 'nullable',
             'fav_icon' => 'nullable',
@@ -44,11 +51,11 @@ class SettingController extends BackendBaseController implements HasMiddleware
             'phone' => 'nullable|string|max:20',
             'mobile' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:255',
-            'facebook' => 'nullable|url|max:255',
-            'twitter' => 'nullable|url|max:255',
-            'youtube' => 'nullable|url|max:255',
-            'linkedin' => 'nullable|url|max:255',
-            'instagram' => 'nullable|url|max:255',
+            'facebook' => 'nullable|string|max:255',
+            'twitter' => 'nullable|string|max:255',
+            'youtube' => 'nullable|string|max:255',
+            'linkedin' => 'nullable|string|max:255',
+            'instagram' => 'nullable|string|max:255',
             'viber' => 'nullable|string|max:20',
             'whatsapp' => 'nullable|string|max:20',
             'google_map' => 'nullable|string|max:555',

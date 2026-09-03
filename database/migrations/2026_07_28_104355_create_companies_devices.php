@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('api_url')->nullable();
             $table->string('ip')->nullable();
 
-            $table->boolean('status')->default(0);
+            $table->string('status')->default('offline');
             $table->foreignId('created_by')->constrained('users');
             $table->foreignId('updated_by')->nullable()->constrained('users');
 

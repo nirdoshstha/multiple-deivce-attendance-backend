@@ -8,13 +8,30 @@ use App\Models\Designation;
 use App\Models\Staff;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
-class StaffController extends BackendBaseController
+class StaffController extends BackendBaseController implements HasMiddleware
 {
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:staffs.index', only: ['index']),
+            new Middleware('permission:staffs.show', only: ['show']),
+            new Middleware('permission:staffs.store', only: ['store']),
+            new Middleware('permission:staffs.edit', only: ['edit']),
+            new Middleware('permission:staffs.update', only: ['update']),
+            new Middleware('permission:staffs.destroy', only: ['destroy']),
+            new Middleware('permission:staffs.search', only: ['staffs.search']),
+            new Middleware('permission:staffs.restore', only: ['staffs.restore']),
+            new Middleware('permission:staffs.delete_permanent', only: ['staffs.delete_permanent']),
+        ];
+    }
 
     private $model;
     protected $panel = "Staffs";
@@ -331,7 +348,7 @@ class StaffController extends BackendBaseController
             $user_id = $staff->user_id;
             $user = User::where('id', $user_id)->first();
 
-             $user->delete();
+            $user->delete();
             $staff->forceDelete();
 
 

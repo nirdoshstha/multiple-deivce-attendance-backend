@@ -11,11 +11,30 @@ use App\Models\LeaveApplication;
 use App\Models\Staff;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Krbaidik\AdBsConverter\Facades\NepaliDate;
 
-class AttendanceController extends Controller
+class AttendanceController extends Controller implements HasMiddleware
 {
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:attendances.index', only: ['index']),
+            new Middleware('permission:attendances.show', only: ['show']),
+            new Middleware('permission:attendances.store', only: ['store']),
+            new Middleware('permission:attendances.edit', only: ['edit']),
+            new Middleware('permission:attendances.update', only: ['update']),
+            new Middleware('permission:attendances.destroy', only: ['destroy']),
+            new Middleware('permission:attendances.restore', only: ['attendances.restore']),
+            new Middleware('permission:attendance.search_by_date', only: ['attendance.search_by_date']),
+            new Middleware('permission:attendance.search_by_month', only: ['attendance.search_by_month']),
+        ];
+    }
 
     // public function index()
     // {
@@ -358,10 +377,10 @@ class AttendanceController extends Controller
             'company',
             'designation',
             'leaves' => function ($q) use ($request, $month) { //HasMany relationship for LeaveApplication of Staff so..
-            // Any leave that overlaps this month *** leave_type belongs relationship.
-            $q->with('leave_type')->where('is_approved', 1) // drop this line if you want all statuses
-              ->where('date_from', '<=', $request->year . '-' . $month . '-31')
-              ->where('date_to', '>=', $request->year . '-' . $month . '-01');
+                // Any leave that overlaps this month *** leave_type belongs relationship.
+                $q->with('leave_type')->where('is_approved', 1) // drop this line if you want all statuses
+                    ->where('date_from', '<=', $request->year . '-' . $month . '-31')
+                    ->where('date_to', '>=', $request->year . '-' . $month . '-01');
             },
             'attendances' => function ($q) use ($request) {
 
@@ -417,5 +436,21 @@ class AttendanceController extends Controller
             'holidays' => $holidays,
             'disabled' => $holiday_date,
         ]);
+    }
+
+    public function doGet(Request $request, Response $response)
+    {
+        // return 'ok';
+        Log::info('Request value hgjk');
+        foreach ($request->all() as $key => $value) {
+            Log::info('Request value', [
+                'key' => $key,
+                'value' => $value,
+            ]);
+        }
+        $command = 'C:' . rand(100, 200) . ':DATA QUERY ATTLOG StartTime=2026-09-02 00:00:00' . "\t" . 'EndTime=2026-09-02 23:59:59';
+        // return response('C:1:INFO');
+        // return response('C:1:REBOOT');
+        return $command;
     }
 }

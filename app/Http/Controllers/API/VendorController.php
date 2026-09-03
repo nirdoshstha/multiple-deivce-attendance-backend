@@ -6,12 +6,27 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Vendor;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-class VendorController extends BackendBaseController
+class VendorController extends BackendBaseController implements HasMiddleware
 {
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:vendors.index', only: ['index']),
+            new Middleware('permission:vendors.show', only: ['show']),
+            new Middleware('permission:vendors.store', only: ['store']),
+            new Middleware('permission:vendors.update', only: ['update']),
+            new Middleware('permission:vendors.destroy', only: ['destroy']),
+            new Middleware('permission:vendors.restore', only: ['vendors.restore']),
+            new Middleware('permission:vendor.delete_permanent', only: ['vendor.delete_permanent']),
+        ];
+    }
 
     private $model;
     protected $panel = "Vendor";
@@ -75,7 +90,7 @@ class VendorController extends BackendBaseController
             // Assign Vendor role
             $user->assignRole('Vendor');
 
-            // 3. 
+            // 3.
             $user->vendors()->attach($vendor->id, [
                 'role' => 'Vendor',
             ]);

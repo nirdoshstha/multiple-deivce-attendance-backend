@@ -32,6 +32,7 @@ class UserController extends BackendBaseController implements HasMiddleware
             new Middleware('permission:users.store', only: ['store']),
             new Middleware('permission:users.update', only: ['update']),
             new Middleware('permission:users.destroy', only: ['destroy']),
+            new Middleware('permission:users.search', only: ['users.search']),
         ];
     }
 

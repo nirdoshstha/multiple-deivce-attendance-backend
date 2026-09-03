@@ -62,20 +62,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('device-brand', DeviceBrandController::class);
     Route::apiResource('devices', DeviceController::class);
 
+    //Company Devices Connect and sync
 
-    Route::apiResource('company-devices', CompanyDeviceController::class);
     Route::get('company-devices/restore/{id}', [CompanyDeviceController::class, 'restore'])->name('company_devices.restore');
     Route::delete('company-devices/permanent/{id}', [CompanyDeviceController::class, 'destroyPermanent'])->name('company_devices.delete_permanent');
-
-    //Company Device connection and sync
     Route::post('/company-devices/{companyDevice}/check-connection', [CompanyDeviceController::class, 'checkConnection']);
     Route::post('/company-devices/{companyDevice}/sync', [CompanyDeviceController::class, 'sync']);
+
+    Route::apiResource('company-devices', CompanyDeviceController::class); // last
 
     //
     Route::get('/staffs/search', [StaffController::class, 'searchStaff'])->name('staffs.search');
     Route::apiResource('staffs', StaffController::class);
-    Route::get('staffs/restore/{id}', [StaffController::class, 'restore'])->name('company_devices.restore');
-    Route::delete('staffs/permanent/{id}', [StaffController::class, 'destroyPermanent'])->name('company_devices.delete_permanent');
+    Route::get('staffs/restore/{id}', [StaffController::class, 'restore'])->name('staffs.restore');
+    Route::delete('staffs/permanent/{id}', [StaffController::class, 'destroyPermanent'])->name('staffs.delete_permanent');
 
     //Calendar
     Route::apiResource('calendars', CalendarController::class)->withoutMiddleware('auth:sanctum');
@@ -84,12 +84,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Attendances
     Route::apiResource('attendances',  AttendanceController::class);
-    Route::get('attendances/restore/{id}', [AttendanceController::class, 'restore'])->name('company_devices.restore');
-    Route::delete('attendances/permanent/{id}', [AttendanceController::class, 'destroyPermanent'])->name('company_devices.delete_permanent');
-    Route::get('attendance/search-by-date', [AttendanceController::class, 'searchByDate'])->name('attendance.searchByDate');
-
-    //Search By Month
-    Route::get('/attendance/search-by-month', [AttendanceController::class, 'searchByMonth']);
+    Route::get('attendances/restore/{id}', [AttendanceController::class, 'restore'])->name('attendances.restore');
+    Route::delete('attendances/permanent/{id}', [AttendanceController::class, 'destroyPermanent'])->name('attendances.delete_permanent');
+    Route::get('attendance/search-by-date', [AttendanceController::class, 'searchByDate'])->name('attendance.search_by_date');
+    Route::get('/attendance/search-by-month', [AttendanceController::class, 'searchByMonth'])->name('attendance.search_by_month');
 
     //Attendance Logs
     Route::apiResource('attendance-logs', AttendanceLogController::class);

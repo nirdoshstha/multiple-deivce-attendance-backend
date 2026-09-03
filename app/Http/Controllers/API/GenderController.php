@@ -5,10 +5,23 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Gender;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Str;
 
-class GenderController extends BackendBaseController
+class GenderController extends BackendBaseController implements HasMiddleware
 {
+
+ public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:genders.index', only: ['index']),
+            new Middleware('permission:genders.show', only: ['show']),
+            new Middleware('permission:genders.store', only: ['store']),
+            new Middleware('permission:genders.update', only: ['update']),
+            new Middleware('permission:genders.destroy', only: ['destroy']), 
+        ];
+    }
 
     private $model;
     protected $panel = "Gender";
@@ -53,7 +66,7 @@ class GenderController extends BackendBaseController
 
 
         return response()->json([
-            'status' => 200, 
+            'status' => 200,
              'message' => $this->panel . ' "' .  $request->name. '" stored successfully.',
         ]);
     }

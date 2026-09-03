@@ -6,9 +6,24 @@ use App\Http\Controllers\Controller;
 use App\Models\LeaveApplication;
 use App\Models\LeaveType;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class LeaveApplicationController extends Controller
+
+class LeaveApplicationController extends BackendBaseController implements HasMiddleware
 {
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:leave-application.index', only: ['index']),
+            new Middleware('permission:leave-application.show', only: ['show']),
+            new Middleware('permission:leave-application.store', only: ['store']),
+            new Middleware('permission:leave-application.edit', only: ['edit']),
+            new Middleware('permission:leave-application.update', only: ['update']),
+            new Middleware('permission:leave-application.destroy', only: ['destroy']),
+        ];
+    }
     private $model;
     protected $panel = "Leave Application";
 

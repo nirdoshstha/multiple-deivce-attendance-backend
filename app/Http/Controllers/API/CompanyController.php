@@ -6,12 +6,27 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-class CompanyController extends BackendBaseController
+class CompanyController extends BackendBaseController implements HasMiddleware
 {
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:companys.index', only: ['index']),
+            new Middleware('permission:companys.show', only: ['show']),
+            new Middleware('permission:companys.store', only: ['store']),
+            new Middleware('permission:companys.update', only: ['update']),
+            new Middleware('permission:companys.destroy', only: ['destroy']),
+            new Middleware('permission:companys.restore', only: ['company.restore']),
+            new Middleware('permission:company.delete_permanent', only: ['company.delete_permanent']),
+        ];
+    }
 
     private $model;
     protected $panel = "Company";
@@ -93,7 +108,7 @@ class CompanyController extends BackendBaseController
                 'role' => 'Company',
             ]);
 
-             $user->companies()->attach($company->id, [
+            $user->companies()->attach($company->id, [
                 'role' => 'Company',
             ]);
 

@@ -5,10 +5,23 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Designation;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Str;
 
-class DesignationController extends BackendBaseController
+class DesignationController extends BackendBaseController implements HasMiddleware
 {
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:designations.index', only: ['index']),
+            new Middleware('permission:designations.show', only: ['show']),
+            new Middleware('permission:designations.store', only: ['store']),
+            new Middleware('permission:designations.update', only: ['update']),
+            new Middleware('permission:designations.destroy', only: ['destroy']),
+        ];
+    }
 
     private $model;
     protected $panel = "Designation";

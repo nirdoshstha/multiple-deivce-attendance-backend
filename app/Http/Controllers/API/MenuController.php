@@ -20,11 +20,12 @@ class MenuController extends BackendBaseController
     }
     public function index()
     {
-        $menus = $this->model->with('parent')->orderBy('rank')->get();
+        $menus = $this->model->with('parent', 'subCategories')->orderBy('rank')->get();
         $permissions = Permission::orderBy('name')->get();
         // $category = $this->model->with('subCategories')->where('parent_id', null)->orderBy('rank')->get();
         $category = Menu::with([
             'permission',
+            'subCategories',
             'subCategories.permission',
             'subCategories.subCategories.permission'
         ])
@@ -88,11 +89,12 @@ class MenuController extends BackendBaseController
     public function show(string $id)
     {
         $menu = $this->model->findOrFail($id);
-        $menus = $this->model->with('parent')->whereNull('parent_id')->get();
+        // $menus = $this->model->with('parent')->whereNull('parent_id')->get();
+        $parents = $this->model->has('subCategories')->get();
         return response()->json([
             'status' => 200,
             'menu' => $menu,
-            'menus' => $menus
+            'parents' => $parents
         ]);
     }
 

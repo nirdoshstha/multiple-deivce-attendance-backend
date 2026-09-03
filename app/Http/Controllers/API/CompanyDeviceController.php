@@ -27,9 +27,10 @@ class CompanyDeviceController extends BackendBaseController
         $this->model = new CompanyDevice();
     }
 
-    
+
     public function index()
-    { $user = auth()->user();
+    {
+        $user = auth()->user();
 
         // $devices = $this->model->with('brand', 'company')->get();
         $device_brand = DeviceBrand::get();
@@ -45,12 +46,11 @@ class CompanyDeviceController extends BackendBaseController
             $devices = $this->model
                 ->with(['device', 'brand', 'company'])
                 ->get();
-
         } else {
 
-             $devices = CompanyDevice::with(['device', 'brand', 'company'])
-            ->whereIn('company_id', $user->companies()->pluck('companies.id'))
-            ->get();
+            $devices = CompanyDevice::with(['device', 'brand', 'company'])
+                ->whereIn('company_id', $user->companies()->pluck('companies.id'))
+                ->get();
         }
         return response()->json([
             'status' => 200,
@@ -243,22 +243,25 @@ class CompanyDeviceController extends BackendBaseController
     }
 
     public function getDevicesByBrand(Request $request)
-{
-    $devices = Device::where('device_brand_id', $request->device_brand_id)
-        ->get(['id', 'name', 'device_brand_id']);
+    {
+        $devices = Device::where('device_brand_id', $request->device_brand_id)
+            ->get(['id', 'name', 'device_brand_id']);
 
-    return response()->json([
-        'devices' => $devices
-    ]);
-}
+        return response()->json([
+            'devices' => $devices
+        ]);
+    }
 
 
 
- // POST /api/company-devices/{companyDevice}/check-connection
+    // POST /api/company-devices/{companyDevice}/check-connection
     // A lightweight ping: connect + verify serial number, no data pulled.
     public function checkConnection(CompanyDevice $companyDevice): JsonResponse
     {
+
+
         $service = new FingerprintDeviceService($companyDevice);
+
 
         try {
             $service->connect();
@@ -287,9 +290,8 @@ class CompanyDeviceController extends BackendBaseController
             report($e);
 
             return response()->json([
-                'message' => 'Sync failed: '.$e->getMessage(),
+                'message' => 'Sync failed: ' . $e->getMessage(),
             ], 422);
         }
     }
-
 }

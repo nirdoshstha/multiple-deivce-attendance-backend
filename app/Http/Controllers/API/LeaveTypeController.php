@@ -3,13 +3,28 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+
+use Illuminate\Routing\Controllers\HasMiddleware;
 use App\Models\LeaveType;
 use Illuminate\Http\Request;
-
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Str;
 
-class LeaveTypeController extends BackendBaseController
+class LeaveTypeController extends BackendBaseController implements HasMiddleware
 {
+
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:leave-type.index', only: ['index']),
+            new Middleware('permission:leave-type.show', only: ['show']),
+            new Middleware('permission:leave-type.store', only: ['store']),
+            new Middleware('permission:leave-type.edit', only: ['edit']),
+            new Middleware('permission:leave-type.update', only: ['update']),
+            new Middleware('permission:leave-type.destroy', only: ['destroy']),
+        ];
+    }
 
     private $model;
     protected $panel = "Leave Type";

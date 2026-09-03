@@ -5,10 +5,24 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\DeviceBrand;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Str;
 
-class DeviceBrandController extends BackendBaseController
+class DeviceBrandController extends BackendBaseController implements HasMiddleware
 {
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:device-brand.index', only: ['index']),
+            new Middleware('permission:device-brand.show', only: ['show']),
+            new Middleware('permission:device-brand.store', only: ['store']),
+            new Middleware('permission:device-brand.edit', only: ['edit']),
+            new Middleware('permission:device-brand.update', only: ['update']),
+            new Middleware('permission:device-brand.destroy', only: ['destroy']),
+        ];
+    }
 
     private $model;
     protected $panel = "Device Brand";
