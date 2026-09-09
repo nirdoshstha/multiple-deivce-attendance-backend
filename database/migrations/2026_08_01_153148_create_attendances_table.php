@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('attendances', function (Blueprint $table) {
             $table->id();
 
-        
+
             $table->string('date');
+            $table->foreignId('company_id')->constrained('companies')->cascadeOnUpdate();
             $table->unsignedBigInteger('staff_id');
             $table->time('check_in')->nullable();
             $table->time('check_out')->nullable();
@@ -28,11 +29,11 @@ return new class extends Migration
 
             $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
-            
+
             $table->foreign('staff_id')->references('id')->on('staffs')->onDelete('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('set null');
-        
+
             $table->timestamps();
         });
     }

@@ -10,14 +10,17 @@ class DeviceAttendanceLog extends Model
         'company_device_id',
         'staff_id',
         'device_user_id',
-        'punch_time',
+        'date',
+        'time',
+        'attendance_type',
         'verify_type',
         'punch_state',
         'processed',
+        'created_by',
+        'updated_by'
     ];
 
     protected $casts = [
-        'punch_time' => 'datetime',
         'processed' => 'boolean',
     ];
 

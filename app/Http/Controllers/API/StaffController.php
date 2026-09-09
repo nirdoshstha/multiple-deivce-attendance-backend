@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Models\CompanyDevice;
 use App\Models\Designation;
 use App\Models\Staff;
 use App\Models\User;
@@ -48,6 +49,7 @@ class StaffController extends BackendBaseController implements HasMiddleware
         $trashed = $this->model->onlyTrashed()->count();
         $trashed_all  = $this->model->with('company', 'designation')->onlyTrashed()->get();
         $designations = Designation::get();
+        $devices = CompanyDevice::get();
         $companies = auth()->user()->companies;
 
 
@@ -67,9 +69,9 @@ class StaffController extends BackendBaseController implements HasMiddleware
         //2nd method
         $user = auth()->user();
         if ($user->can('staffs.view.all')) {
-            $staffs = Staff::with('company', 'designation', 'user')->get();
+            $staffs = Staff::with('company', 'designation', 'user', 'deviceLinks')->get();
         } else {
-            $staffs = Staff::with('company', 'designation', 'user')
+            $staffs = Staff::with('company', 'designation', 'user', 'deviceLinks')
                 ->whereIn('company_id', $user->companies->pluck('id'))
                 ->get();
         }
@@ -81,7 +83,8 @@ class StaffController extends BackendBaseController implements HasMiddleware
             'trashed' => $trashed,
             'trashed_all' => $trashed_all,
             'designations' => $designations,
-            'companies' => $companies
+            'companies' => $companies,
+            'devices' => $devices
         ]);
     }
 

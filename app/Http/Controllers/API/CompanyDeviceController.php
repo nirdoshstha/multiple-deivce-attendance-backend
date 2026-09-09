@@ -60,43 +60,6 @@ class CompanyDeviceController extends BackendBaseController
             'device_brand' => $device_brand,
             'companies' => $companies
         ]);
-
-
-        // $response = Http::get('https://jsonplaceholder.typicode.com/users');
-        // if ($response) {
-        //     foreach ($response->json() as $device) {
-        //         CompanyDevice::updateOrCreate(
-        //             ['ip' => $device['email']],
-        //             [
-        //                 'name' => $device['name'],
-        //                 'company_id' => '1',
-        //                 'device_brand_id' => '2',
-        //                 'device_id' => '3',
-        //                 'serial_no' => '12345',
-        //                 'port' => '8080',
-        //                 'api_key' => '789',
-        //                 'device_code' => $device['username'],
-        //                 'api_url' => $device['website'],
-        //                 'ip' => $device['email'],
-        //                 'created_by' => auth('sanctum')->user()->id
-        //             ]
-        //         );
-        //     }
-        //     $devices = $this->model->get();
-        //     $trashed = $this->model->onlyTrashed()->count();
-        //     $trashed_all  = $this->model->onlyTrashed()->get();
-        //     return response()->json([
-        //         'status' => 200,
-        //         'message' => 'Users Imported Successfully',
-        //         'devices' => $devices,
-        //         'trashed' => $trashed,
-        //         'trashed_all' => $trashed_all
-        //     ]);
-        // }
-        // return response()->json([
-        //     'status' => 500,
-        //     'message' => 'API Error'
-        // ]);
     }
 
     /**
@@ -259,6 +222,21 @@ class CompanyDeviceController extends BackendBaseController
     public function checkConnection(CompanyDevice $companyDevice): JsonResponse
     {
 
+        // Push devices never accept an inbound connection — they call you.
+        // "Checking connection" for these means "did it check in recently,"
+        // not opening a socket (which would just time out and mislabel a
+        // perfectly healthy device as offline).
+        if ($companyDevice->connection_mode === 'push') {
+            $isOnline = $companyDevice->last_seen_at
+                && $companyDevice->last_seen_at->gt(now()->subMinutes(5));
+
+            return response()->json([
+                'status' => $isOnline ? 'online' : 'offline',
+                'serial_no' => $companyDevice->serial_no,
+                'last_seen_at' => $companyDevice->last_seen_at,
+            ], $isOnline ? 200 : 422);
+        }
+
 
         $service = new FingerprintDeviceService($companyDevice);
 
@@ -282,6 +260,16 @@ class CompanyDeviceController extends BackendBaseController
     // POST /api/company-devices/{companyDevice}/sync
     public function sync(CompanyDevice $companyDevice): JsonResponse
     {
+
+        // Push devices send data on their own schedule — there's nothing to
+        // "pull." Make that explicit instead of trying (and failing) to
+        // connect outbound to a device that only calls inbound.
+        if ($companyDevice->connection_mode === 'push') {
+            return response()->json([
+                'message' => 'This device pushes attendance automatically — manual sync isn\'t applicable. Check last_seen_at to confirm it\'s checking in.',
+            ], 422);
+        }
+        
         try {
             $summary = (new FingerprintDeviceService($companyDevice))->sync();
 

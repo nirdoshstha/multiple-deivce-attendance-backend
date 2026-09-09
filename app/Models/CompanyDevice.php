@@ -22,12 +22,14 @@ class CompanyDevice extends BackendBaseModel
         'api_url',
         'ip',
         'status',
+        'connection_mode', // 'pull' (server connects to device) or 'push' (device calls server via iClock/ADMS)
+        'last_seen_at',
         'created_by',
         'updated_by'
     ];
 
 
-     // 'encrypted' transparently encrypts on save and decrypts on read, so the
+    // 'encrypted' transparently encrypts on save and decrypts on read, so the
     // credential never sits in the database (or in a backup/dump) as plain
     // text. Requires APP_KEY to be set, which Laravel needs anyway.
     protected $casts = [

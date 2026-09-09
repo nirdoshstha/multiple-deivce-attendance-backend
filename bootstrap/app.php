@@ -20,6 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
         ]);
+
+        $middleware->validateCsrfTokens(except: [
+            'iclock/*',
+        ]); //For Iclock important
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

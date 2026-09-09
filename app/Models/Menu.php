@@ -17,8 +17,9 @@ class Menu extends BackendBaseModel
 
     public function subCategories()
     {
-        return $this->hasMany(Menu::class, 'parent_id')->with('subCategories');;
+        return $this->hasMany(Menu::class, 'parent_id')->with('subCategories', 'permission');;
     }
+
 
     public function permission()
     {

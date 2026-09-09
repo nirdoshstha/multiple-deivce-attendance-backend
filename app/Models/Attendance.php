@@ -10,7 +10,7 @@ class Attendance extends Model
     protected $fillable = [
         'date',
         'staff_id',
-        'company_device_id',
+        'company_id',
         'check_in',
         'check_out',
         'late_minutes',
@@ -22,6 +22,4 @@ class Attendance extends Model
         'created_by',
         'updated_by',
     ];
-
-
 }

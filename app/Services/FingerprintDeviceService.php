@@ -2,9 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Attendance;
 use App\Models\CompanyDevice;
-use App\Models\DeviceAttendanceLog;
 use App\Models\DeviceStaffLink;
 use App\Services\Devices\DeviceDriverFactory;
 use App\Services\Devices\FingerprintDeviceDriverInterface;
@@ -17,12 +15,17 @@ class FingerprintDeviceService
 {
     protected FingerprintDeviceDriverInterface $driver;
 
+    protected AttendanceAggregator $aggregator;
+
     public function __construct(protected CompanyDevice $companyDevice)
     {
         // Resolves ZktecoDriver, HikvisionDriver, etc. based on this specific
         // device's brand — so devices from different companies AND different
         // brands are each handled correctly in the same sync run.
+        // Only meaningful for 'pull' devices; don't construct this for
+        // 'push'/iClock devices — they never need an outbound driver at all.
         $this->driver = DeviceDriverFactory::make($companyDevice);
+        $this->aggregator = new AttendanceAggregator();
     }
 
     /**
@@ -101,7 +104,6 @@ class FingerprintDeviceService
                 'processed' => false,
                 'created_at' => now(),
                 'updated_at' => now(),
-
             ]);
 
             if ($wasInserted && $staffId) {
@@ -114,7 +116,7 @@ class FingerprintDeviceService
         }
 
         foreach ($affected as $pair) {
-            $this->rebuildAttendanceFor($pair['staff_id'], $pair['date']);
+            $this->aggregator->rebuildFor($pair['staff_id'], $pair['date'], $this->companyDevice->id);
         }
 
         return [
@@ -131,50 +133,6 @@ class FingerprintDeviceService
             ->where('company_device_id', $this->companyDevice->id)
             ->where('device_user_id', $deviceUserId)
             ->value('staff_id');
-    }
-
-    /**
-     * Rebuild the aggregated Attendance row for one staff member on one date
-     * from every stored punch that day: earliest punch = check_in, latest =
-     * check_out. Wrapped in a transaction + row lock so two overlapping syncs
-     * (e.g. the scheduled job and a manual "Sync now" click) can't corrupt it.
-     */
-    protected function rebuildAttendanceFor(int $staffId, string $date): void
-    {
-        DB::transaction(function () use ($staffId, $date) {
-            $punches = DeviceAttendanceLog::query()
-                ->where('staff_id', $staffId)
-                ->whereDate('punch_time', $date)
-                ->orderBy('punch_time')
-                ->lockForUpdate()
-                ->get();
-
-            if ($punches->isEmpty()) {
-                return;
-            }
-
-            $checkIn = $punches->first()->punch_time;
-            $checkOut = $punches->count() > 1 ? $punches->last()->punch_time : null;
-
-            $attendance = Attendance::updateOrCreate(
-                ['staff_id' => $staffId, 'date' => $date],
-                [
-                    'check_in' => $checkIn,
-                    'check_out' => $checkOut,
-                    'working_minutes' => $checkOut ? $checkIn->diffInMinutes($checkOut) : null,
-                    'company_device_id' => $this->companyDevice->id,
-                    'status' => 'present',
-                    // late_minutes / early_leave_minutes / overtime_minutes depend on
-                    // each staff member's shift schedule, which isn't in scope here —
-                    // compute those in a dedicated ShiftCalculator once you have shift
-                    // data, then set them alongside the fields above.
-                ]
-            );
-
-            DeviceAttendanceLog::query()
-                ->whereIn('id', $punches->pluck('id'))
-                ->update(['processed' => true]);
-        });
     }
 
     protected function markStatus(string $status): void

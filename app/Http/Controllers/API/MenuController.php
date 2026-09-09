@@ -5,11 +5,25 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 
-class MenuController extends BackendBaseController
+class MenuController extends BackendBaseController implements HasMiddleware
 {
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:menus.index', only: ['index']),
+            new Middleware('permission:menus.show', only: ['show']),
+            new Middleware('permission:menus.store', only: ['store']),
+            new Middleware('permission:menus.edit', only: ['edit']),
+            new Middleware('permission:menus.update', only: ['update']),
+            new Middleware('permission:menus.destroy', only: ['destroy']),
+        ];
+    }
 
     private $model;
     protected $panel = "Menus ";
@@ -18,29 +32,69 @@ class MenuController extends BackendBaseController
     {
         $this->model = new Menu();
     }
+    // public function index()
+    // {
+    //     $menus = $this->model->with('parent', 'subCategories')->orderBy('rank')->get();
+    //     // $category = $this->model->with('subCategories')->where('parent_id', null)->orderBy('rank')->get();
+    //     $category = Menu::with([
+    //         'permission',
+    //         'subCategories',
+    //     ])
+    //         ->whereNull('parent_id')
+    //         ->where('status', 1)
+    //         ->orderBy('rank')
+    //         ->get();
+
+    //     return response()->json([
+    //         'status' => 200,
+    //         'message' => $this->panel . ' Fetched Successfully',
+    //         'menus' => $menus,
+    //         'category' => $category,
+    //     ]);
+    // }
+
     public function index()
     {
+        $user = auth('sanctum')->user();
+
         $menus = $this->model->with('parent', 'subCategories')->orderBy('rank')->get();
-        $permissions = Permission::orderBy('name')->get();
-        // $category = $this->model->with('subCategories')->where('parent_id', null)->orderBy('rank')->get();
-        $category = Menu::with([
-            'permission',
-            'subCategories',
-            'subCategories.permission',
-            'subCategories.subCategories.permission'
-        ])
+
+        $category = Menu::with(['permission', 'subCategories'])
             ->whereNull('parent_id')
             ->where('status', 1)
             ->orderBy('rank')
             ->get();
+
+        $category = $this->filterMenusByPermission($category, $user);
 
         return response()->json([
             'status' => 200,
             'message' => $this->panel . ' Fetched Successfully',
             'menus' => $menus,
             'category' => $category,
-            'permissions' => $permissions
         ]);
+    }
+
+    /**
+     * Recursively drop any menu (and its children) the user isn't allowed to see.
+     * A menu with no permission_id is treated as public.
+     */
+    private function filterMenusByPermission($menus, $user)
+    {
+        return $menus
+            ->filter(function ($menu) use ($user) {
+                return !$menu->permission || $user->can($menu->permission->name);
+            })
+            ->map(function ($menu) use ($user) {
+                if ($menu->subCategories && $menu->subCategories->count()) {
+                    $menu->setRelation(
+                        'subCategories',
+                        $this->filterMenusByPermission($menu->subCategories, $user)
+                    );
+                }
+                return $menu;
+            })
+            ->values();
     }
 
     /**

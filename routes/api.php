@@ -20,6 +20,7 @@ use App\Http\Controllers\API\CalendarController;
 use App\Http\Controllers\API\LeaveApplicationController;
 use App\Http\Controllers\API\MenuController;
 use App\Http\Controllers\API\LeaveTypeController;
+use App\Http\Controllers\API\StaffDeviceLinkController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -76,6 +77,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('staffs', StaffController::class);
     Route::get('staffs/restore/{id}', [StaffController::class, 'restore'])->name('staffs.restore');
     Route::delete('staffs/permanent/{id}', [StaffController::class, 'destroyPermanent'])->name('staffs.delete_permanent');
+
+    Route::apiResource('staff-device-links', StaffDeviceLinkController::class);
 
     //Calendar
     Route::apiResource('calendars', CalendarController::class)->withoutMiddleware('auth:sanctum');

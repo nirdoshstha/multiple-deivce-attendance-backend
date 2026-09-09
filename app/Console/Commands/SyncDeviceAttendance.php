@@ -17,7 +17,7 @@ class SyncDeviceAttendance extends Command
     public function handle(): int
     {
         $devices = CompanyDevice::query()
-            ->where('status', '!=', '1')
+            ->where('status', '!=', 'offline')
             ->when($this->argument('companyDeviceId'), fn($q, $id) => $q->where('id', $id))
             ->get();
 
