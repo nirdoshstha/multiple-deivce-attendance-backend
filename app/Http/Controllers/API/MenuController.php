@@ -176,7 +176,8 @@ class MenuController extends BackendBaseController implements HasMiddleware
 
         $menu->update([
             'name' => $request->name,
-            'slug' => Str::slug($request->title),
+            'display_name' => $request->display_name,
+            'slug' => Str::slug($request->name),
             'route' => $request->route,
             'rank' => $request->rank,
             'icon' => $request->icon,

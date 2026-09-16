@@ -50,6 +50,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('leave-types', LeaveTypeController::class);
     Route::apiResource('leave-applications', LeaveApplicationController::class);
 
+    Route::post('leave-isapproved/{id}', [LeaveApplicationController::class, 'isApproved'])->name('leave_is_approved');
+
     Route::get('users/search', [UserController::class, 'userSearch'])->name('users.search');
     Route::apiResource('users', UserController::class);
 

@@ -30,11 +30,11 @@ class DatabaseSeeder extends Seeder
             DeviceSeeder::class,
             // CompanyDeviceSeeder::class,
             VendorSeeder::class,
-
-
+            MenuSeeder::class,
+            LeaveTypeSeeder::class,
+            DesignationSeeder::class,
+            CompanySeeder::class
 
         ]);
-
-
     }
 }
