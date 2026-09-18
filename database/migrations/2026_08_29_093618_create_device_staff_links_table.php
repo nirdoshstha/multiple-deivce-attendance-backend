@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('company_device_id')->constrained('companies_devices')->cascadeOnDelete();
             $table->foreignId('staff_id')->constrained('staffs')->cascadeOnDelete();
             $table->string('device_user_id'); // the uid/PIN as enrolled on the device
+            $table->time('duty_start_time')->nullable();
+            $table->time('duty_end_time')->nullable();
             $table->timestamps();
 
             // One staff member can only be enrolled once per device, and one

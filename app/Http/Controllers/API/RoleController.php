@@ -29,7 +29,11 @@ class RoleController extends Controller implements HasMiddleware
     public function index()
     {
         $roles = Role::with('permissions')->get();
-        $permissions = Permission::get();
+        $permissions = Permission::query()
+            ->orderBy('name')
+            ->get()
+            ->groupBy(fn ($permission) => explode('.', $permission->name)[0]);
+
 
         //dd(Route::getRoutes());
         $routes = collect(Route::getRoutes())->map(function ($route) {
@@ -83,10 +87,15 @@ class RoleController extends Controller implements HasMiddleware
     public function show(string $id)
     {
         $role = Role::with('permissions')->findOrFail($id);
+        $permissions = Permission::get()
+            ->groupBy(fn($permission) => explode('.', $permission->name)[0]);
+
+
         return response()->json([
             'message' => 'Specific Role get successfully',
             'status' => 200,
             'role' => $role,
+            'permissions' => $permissions,
         ]);
 
         // 2nd way
@@ -103,6 +112,12 @@ class RoleController extends Controller implements HasMiddleware
     public function edit(string $id)
     {
         $role = Role::with('permissions')->findOrFail($id);
+        $permissions = Permission::get()
+            ->groupBy(fn($permission) => explode('.', $permission->name)[0])
+            ->map(fn($group) => $group->first())
+            ->values();
+
+        return $permissions;
         return response()->json([
             'message' => 'Specific Role get successfully',
             'status' => 200,

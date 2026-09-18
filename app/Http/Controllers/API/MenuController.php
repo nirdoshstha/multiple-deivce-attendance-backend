@@ -58,6 +58,7 @@ class MenuController extends BackendBaseController implements HasMiddleware
         $user = auth('sanctum')->user();
 
         $menus = $this->model->with('parent', 'subCategories')->orderBy('rank')->get();
+        $permissions = Permission::where('name', "like", "%.index")->get();
 
         $category = Menu::with(['permission', 'subCategories'])
             ->whereNull('parent_id')
@@ -72,6 +73,7 @@ class MenuController extends BackendBaseController implements HasMiddleware
             'message' => $this->panel . ' Fetched Successfully',
             'menus' => $menus,
             'category' => $category,
+            'permissions' => $permissions
         ]);
     }
 
@@ -144,11 +146,14 @@ class MenuController extends BackendBaseController implements HasMiddleware
     {
         $menu = $this->model->findOrFail($id);
         // $menus = $this->model->with('parent')->whereNull('parent_id')->get();
+
+        $permissions = Permission::where('name', "like", "%.index")->get();
         $parents = $this->model->has('subCategories')->get();
         return response()->json([
             'status' => 200,
             'menu' => $menu,
-            'parents' => $parents
+            'parents' => $parents,
+            'permissions' => $permissions
         ]);
     }
 
@@ -178,6 +183,7 @@ class MenuController extends BackendBaseController implements HasMiddleware
             'name' => $request->name,
             'display_name' => $request->display_name,
             'slug' => Str::slug($request->name),
+            'permission_id' => $request->permission_id,
             'route' => $request->route,
             'rank' => $request->rank,
             'icon' => $request->icon,

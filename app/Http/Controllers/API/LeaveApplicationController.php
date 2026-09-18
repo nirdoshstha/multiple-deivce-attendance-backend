@@ -369,6 +369,7 @@ class LeaveApplicationController extends BackendBaseController implements HasMid
             'approved_by' => auth('sanctum')->user()->id,
             'approval_remarks' => $request->approval_remarks,
             'is_approved' => $request->is_approved,
+            'approved_at' => now()
         ]);
 
         return response()->json([

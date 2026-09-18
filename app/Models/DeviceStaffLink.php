@@ -10,6 +10,8 @@ class DeviceStaffLink extends Model
         'company_device_id',
         'staff_id',
         'device_user_id',
+        'duty_start_time',
+        'duty_end_time'
     ];
 
     public function companyDevice()

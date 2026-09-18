@@ -16,6 +16,8 @@ class StaffDeviceLinkController extends Controller
             'staff_id' => 'required|exists:staffs,id',
             'company_device_id' => 'required|exists:companies_devices,id',
             'device_user_id' => 'required|string|max:100',
+            'duty_start_time' => 'nullable|date_format:H:i',
+            'duty_end_time' => 'nullable|date_format:H:i',
         ]);
 
         $link = DeviceStaffLink::updateOrCreate(
@@ -25,6 +27,8 @@ class StaffDeviceLinkController extends Controller
             ],
             [
                 'device_user_id' => $validated['device_user_id'],
+                'duty_start_time' => $validated['duty_start_time'] ?? null,
+                'duty_end_time' => $validated['duty_end_time'] ?? null,
             ]
         );
 

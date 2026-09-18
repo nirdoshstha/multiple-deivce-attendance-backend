@@ -135,8 +135,9 @@ class AttendanceController extends Controller implements HasMiddleware
                     : now()->toDateString();
 
                 // Office timings
-                $officeTime = Carbon::parse($attendance['date'] . ' 09:00');
-                $officeExitTime = Carbon::parse($attendance['date'] . ' 17:00');
+                $device_link =  Staff::find($attendance["staff_id"])->device_link;
+                $officeTime = Carbon::parse($attendance['date'] . $device_link?->duty_start_time);
+                $officeExitTime = Carbon::parse($attendance['date'] . $device_link?->duty_end_time);
 
                 // Check In
                 $checkIn = !empty($attendance['check_in'])
@@ -166,7 +167,7 @@ class AttendanceController extends Controller implements HasMiddleware
                 $overtimeMinutes = 0;
 
                 if ($checkOut && $checkOut->gt($officeExitTime)) {
-                    $overtimeMinutes = $checkOut->diffInMinutes($officeExitTime);
+                    $overtimeMinutes = abs($checkOut->diffInMinutes($officeExitTime));
                 }
 
                 // Working Minutes

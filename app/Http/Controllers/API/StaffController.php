@@ -47,7 +47,7 @@ class StaffController extends BackendBaseController implements HasMiddleware
 
 
         $trashed = $this->model->onlyTrashed()->count();
-        $trashed_all  = $this->model->with('company', 'designation')->onlyTrashed()->get();
+        $trashed_all  = $this->model->with('company', 'designation', 'user')->onlyTrashed()->get();
         $designations = Designation::get();
         $devices = CompanyDevice::get();
         $companies = auth()->user()->companies;
@@ -69,9 +69,9 @@ class StaffController extends BackendBaseController implements HasMiddleware
         //2nd method
         $user = auth()->user();
         if ($user->can('staffs.view.all')) {
-            $staffs = Staff::with('company', 'designation', 'user', 'deviceLinks')->get();
+            $staffs = Staff::with('company', 'designation', 'user', 'device_links')->get();
         } else {
-            $staffs = Staff::with('company', 'designation', 'user', 'deviceLinks')
+            $staffs = Staff::with('company', 'designation', 'user', 'device_links')
                 ->whereIn('company_id', $user->companies->pluck('id'))
                 ->get();
         }
@@ -140,7 +140,7 @@ class StaffController extends BackendBaseController implements HasMiddleware
                 'address'         => $request->address,
                 'company_id'      => $request->company_id,
                 'user_id'         => $user->id,
-                'working_hr'      => $request->working_hr,
+                // 'working_hr'      => $request->working_hr,
                 'created_by'      => auth('sanctum')->id(),
             ]);
 
@@ -167,7 +167,7 @@ class StaffController extends BackendBaseController implements HasMiddleware
      */
     public function show(string $id)
     {
-        $staff = $this->model->with('company', 'designation', 'creator', 'updator')->find($id);
+        $staff = $this->model->with('company', 'designation', 'user', 'creator', 'updator')->findOrFail($id);
         $designations = Designation::get();
         return response()->json([
             'status' => 200,
@@ -184,65 +184,7 @@ class StaffController extends BackendBaseController implements HasMiddleware
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    // public function update(Request $request, string $id)
-    // {
-    //     $request->validate([
-    //         'name'  => 'required|string|max:155',
-    //         'email' => 'required|email',
-    //     ]);
 
-    //     try {
-
-    //         DB::beginTransaction();
-
-    //         $staff = $this->model->findOrFail($id);
-
-    //         $data = $request->except('image', 'created_by', 'updated_by');
-
-    //         $user = User::findOrFail($staff->user_id);
-
-
-    //         if ($request->hasFile('image')) {
-    //             $this->deleteImage($user->image);
-    //             $data['image'] = $this->uploadImage($request->file('image'), 'user');
-    //         }
-
-
-    //         $user->update([
-    //             'name'  => $request->name,
-    //             'email' => $request->email,
-    //             'image'      => $data['image'],
-    //         ]);
-
-    //         $staff->update(array_merge($data, [
-    //             'name'       => $request->name,
-    //             'email'      => $request->email,
-    //             'gender'     => $request->gender,
-    //             'phone'      => $request->phone,
-    //             'address'    => $request->address,
-    //             'working_hr' => $request->working_hr,
-    //             'updated_by' => auth('sanctum')->id(),
-    //         ]));
-
-    //         DB::commit();
-
-    //         return response()->json([
-    //             'status'  => 200,
-    //             'message' => $this->panel . ' "' . $request->name . '" updated successfully.',
-    //         ]);
-    //     } catch (\Exception $e) {
-
-    //         DB::rollBack();
-
-    //         return response()->json([
-    //             'status' => 500,
-    //             'message' => $e->getMessage(),
-    //         ]);
-    //     }
-    // }
 
     public function update(Request $request, string $id)
     {
@@ -261,7 +203,7 @@ class StaffController extends BackendBaseController implements HasMiddleware
             if ($request->hasFile('image')) {
 
                 if ($user->image) {
-                    $this->deleteImage($user->image);
+                    $this->deleteImage($user->image, 'user');
                 }
 
                 $user->image = $this->uploadImage($request->file('image'), 'user');
@@ -281,7 +223,7 @@ class StaffController extends BackendBaseController implements HasMiddleware
                 'gender'       => $request->gender,
                 'phone'        => $request->phone,
                 'address'      => $request->address,
-                'working_hr'   => $request->working_hr,
+                // 'working_hr'   => $request->working_hr,
                 'company_id'   => $request->company_id,
                 'designation_id' => $request->designation_id,
                 'updated_by'   => auth('sanctum')->id(),
@@ -346,20 +288,33 @@ class StaffController extends BackendBaseController implements HasMiddleware
                 ], 404);
             }
 
-            $title = $staff->title;
+            DB::beginTransaction();
 
-            $user_id = $staff->user_id;
-            $user = User::where('id', $user_id)->first();
+            $name = $staff->name;
+            $user = User::find($staff->user_id);
+            $image = $user?->image;
 
-            $user->delete();
+            // staffs.user_id references users.id, so the child staff row must
+            // be removed before its linked user can be deleted.
             $staff->forceDelete();
+
+            if ($user) {
+                $user->delete();
+            }
+
+            DB::commit();
+
+            if ($image) {
+                $this->deleteImage($image, 'user');
+            }
 
 
             return response()->json([
                 'status' => 200,
-                'message' => $title . ' deleted successfully.'
+                'message' => $name . ' deleted successfully.'
             ]);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'status' => 500,
                 'message' => $e->getMessage(),

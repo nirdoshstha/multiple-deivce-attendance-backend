@@ -22,4 +22,9 @@ class Attendance extends Model
         'created_by',
         'updated_by',
     ];
+
+    public function staff()
+    {
+        return $this->belongsTo(Staff::class);
+    }
 }

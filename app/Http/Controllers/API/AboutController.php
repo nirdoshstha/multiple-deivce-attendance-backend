@@ -5,9 +5,23 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\About;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class AboutController extends BackendBaseController
+class AboutController extends BackendBaseController implements HasMiddleware
 {
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:about.index', only: ['index']),
+            new Middleware('permission:about.show', only: ['show']),
+            new Middleware('permission:about.store', only: ['store']),
+            new Middleware('permission:about.edit', only: ['edit']),
+            new Middleware('permission:about.update', only: ['update']),
+            new Middleware('permission:about.destroy', only: ['destroy']),
+        ];
+    }
 
     private $model;
     protected $panel = 'About Us';

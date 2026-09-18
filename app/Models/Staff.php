@@ -47,9 +47,14 @@ class Staff extends BackendBaseModel
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    public function deviceLinks()
+    public function device_links()
     {
         return $this->hasMany(DeviceStaffLink::class);
+    }
+
+    public function device_link()
+    {
+        return $this->hasOne(DeviceStaffLink::class);
     }
 
     public function leaves()

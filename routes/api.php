@@ -21,6 +21,7 @@ use App\Http\Controllers\API\LeaveApplicationController;
 use App\Http\Controllers\API\MenuController;
 use App\Http\Controllers\API\LeaveTypeController;
 use App\Http\Controllers\API\StaffDeviceLinkController;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 

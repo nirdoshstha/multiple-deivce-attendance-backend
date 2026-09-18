@@ -23,7 +23,7 @@ return new class extends Migration
             $table->mediumText('image')->nullable();
             $table->string('email');
             $table->string('address');
-            $table->float('working_hr');
+            $table->float('working_hr')->nullable();
 
             $table->boolean('status')->default(0);
             $table->foreignId('created_by')->constrained('users');

@@ -59,9 +59,10 @@ class BackendBaseController extends Controller
     //     }
     // }
 
-    protected function deleteImage($image_name)
+    protected function deleteImage($image_name, ?string $folder = null)
     {
-        $image = public_path($this->img_path . $image_name);
+        $path = $folder ? 'uploads/' . trim($folder, '/') . '/' : $this->img_path;
+        $image = public_path($path . $image_name);
 
         if (file_exists($image)) {
             unlink($image);

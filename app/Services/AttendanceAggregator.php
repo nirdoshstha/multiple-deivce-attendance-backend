@@ -131,6 +131,15 @@ class AttendanceAggregator
 
             /*
         |--------------------------------------------------------------------------
+        | Staff
+        |--------------------------------------------------------------------------
+        */
+
+            $staff = Staff::findOrFail($staffId);
+
+
+            /*
+        |--------------------------------------------------------------------------
         | Punch times
         |--------------------------------------------------------------------------
         */
@@ -194,8 +203,9 @@ class AttendanceAggregator
         |--------------------------------------------------------------------------
         */
 
-            $officeTime = Carbon::parse('09:00');
-            $officeExitTime = Carbon::parse('17:00');
+            $device_link = $staff->device_link;
+            $officeTime = Carbon::parse($device_link?->duty_start_time);
+            $officeExitTime = Carbon::parse($device_link?->duty_end_time);
 
 
             /*
@@ -267,13 +277,6 @@ class AttendanceAggregator
             }
 
 
-            /*
-        |--------------------------------------------------------------------------
-        | Staff
-        |--------------------------------------------------------------------------
-        */
-
-            $staff = Staff::findOrFail($staffId);
 
 
             /*
