@@ -5,12 +5,13 @@ namespace Database\Seeders;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class CompanySeeder extends Seeder
 {
     public function run(): void
     {
-        // Get an existing user for created_by / updated_by
+        // Existing user for created_by / updated_by
         $userId = User::query()->value('id');
 
         if (!$userId) {
@@ -28,48 +29,74 @@ class CompanySeeder extends Seeder
                 'logo' => null,
                 'pan' => '123456789',
                 'status' => 0,
-            ],
-            [
-                'name' => 'ABC Trading Pvt. Ltd.',
-                'email' => 'info@abctrading.com',
-                'phone' => '01-4567891',
-                'address' => 'Lalitpur, Nepal',
-                'authorized_person' => 'Ram Sharma',
-                'logo' => null,
-                'pan' => '234567890',
-                'status' => 0,
-            ],
-            [
-                'name' => 'XYZ Business Solutions Pvt. Ltd.',
-                'email' => 'info@xyzbusiness.com',
-                'phone' => '01-4567892',
-                'address' => 'Bhaktapur, Nepal',
-                'authorized_person' => 'Sita Shrestha',
-                'logo' => null,
-                'pan' => '345678901',
-                'status' => 0,
+
+                // Company login
+                'password' => '12345678',
             ],
         ];
 
-        foreach ($companies as $company) {
-            Company::updateOrCreate(
+        foreach ($companies as $companyData) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | 1. Create / Update Company
+            |--------------------------------------------------------------------------
+            */
+            $company = Company::updateOrCreate(
                 [
-                    'email' => $company['email'],
+                    'email' => $companyData['email'],
                 ],
                 [
-                    'name' => $company['name'],
-                    'phone' => $company['phone'],
-                    'address' => $company['address'],
-                    'authorized_person' => $company['authorized_person'],
-                    'logo' => $company['logo'],
-                    'pan' => $company['pan'],
-                    'status' => $company['status'],
+                    'name' => $companyData['name'],
+                    'phone' => $companyData['phone'],
+                    'address' => $companyData['address'],
+                    'authorized_person' => $companyData['authorized_person'],
+                    'logo' => $companyData['logo'],
+                    'pan' => $companyData['pan'],
+                    'status' => $companyData['status'],
                     'created_by' => $userId,
                     'updated_by' => $userId,
                 ]
             );
+
+            /*
+            |--------------------------------------------------------------------------
+            | 2. Create / Update User for Company Login
+            |--------------------------------------------------------------------------
+            */
+
+            $user = User::firstOrCreate(
+                [
+                    'email' => $companyData['email'],
+                ],
+                [
+                    'name' => $companyData['name'],
+                    'phone' => $companyData['phone'],
+                    'password' => Hash::make(12345),
+                ]
+             );
+
+            $user->syncRoles(['Company']);
+
+            /*
+            |--------------------------------------------------------------------------
+            | 3. Assign Company Role
+            |--------------------------------------------------------------------------
+            */
+            $user->syncRoles(['Company']);
+
+            /*
+            |--------------------------------------------------------------------------
+            | 4. Connect User with Company
+            |--------------------------------------------------------------------------
+            */
+            $company->users()->syncWithoutDetaching([
+                $user->id => [
+                    'role' => 'Company',
+                ],
+            ]);
         }
 
-        $this->command->info('Companies seeded successfully.');
+        $this->command->info('Companies and company users seeded successfully.');
     }
 }

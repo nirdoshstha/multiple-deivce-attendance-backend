@@ -24,16 +24,18 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             SuperAdminSeeder::class,
+            RoleSeeder::class,
             PermissionSeeder::class,
             PublicHolidaySeeder::class,
             DeviceBrandSeeder::class,
             DeviceSeeder::class,
             // CompanyDeviceSeeder::class,
             VendorSeeder::class,
+            DesignationSeeder::class,
+            CompanySeeder::class,
             MenuSeeder::class,
             LeaveTypeSeeder::class,
-            DesignationSeeder::class,
-            CompanySeeder::class
+            StaffSeeder::class,
 
         ]);
     }

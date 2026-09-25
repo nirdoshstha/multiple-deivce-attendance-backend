@@ -14,7 +14,7 @@ class PermissionController extends Controller
     {
 
     // Reset cached roles/permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions(); //
+        // app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions(); //
 
         $exclude = [
             'sanctum.csrf-cookie',

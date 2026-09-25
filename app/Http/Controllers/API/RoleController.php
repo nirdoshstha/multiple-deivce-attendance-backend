@@ -149,23 +149,42 @@ class RoleController extends Controller implements HasMiddleware
         ]);
     }
 
-    public function destroy($id)
-    {
-        try {
-            $role = Role::findOrFail($id);
 
-            $role->delete();
 
+public function destroy($id)
+{
+    try {
+        $role = Role::findOrFail($id);
+
+        // Check users assigned to this role
+        if ($role->users()->exists()) {
             return response()->json([
-                'status' => 200,
-                'message' => 'Deleted successfully'
-            ]);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-            ], 500);
+                'status' => 422,
+                'message' => 'This role cannot be deleted because it is assigned to one or more users.',
+            ], 422);
         }
+
+        // Check permissions assigned to this role
+        if ($role->permissions()->exists()) {
+            return response()->json([
+                'status' => 422,
+                'message' => 'This role cannot be deleted because it has permissions assigned to it.',
+            ], 422);
+        }
+
+        $role->delete();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Role deleted successfully',
+        ]);
+
+    } catch (\Throwable $e) {
+
+        return response()->json([
+            'status' => 500,
+            'message' => $e->getMessage(),
+        ], 500);
     }
+}
 }

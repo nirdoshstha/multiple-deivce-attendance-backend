@@ -45,6 +45,11 @@ class DesignationSeeder extends Seeder
                 'key' => 'team_leader',
                 'status' => true,
             ],
+             [
+                'name' => 'Fullstack Developer',
+                'key' => 'fullstack_developer',
+                'status' => true,
+            ],
             [
                 'name' => 'Senior Developer',
                 'key' => 'senior_developer',

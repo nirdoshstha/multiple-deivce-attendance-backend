@@ -58,7 +58,8 @@ class MenuController extends BackendBaseController implements HasMiddleware
         $user = auth('sanctum')->user();
 
         $menus = $this->model->with('parent', 'subCategories')->orderBy('rank')->get();
-        $permissions = Permission::where('name', "like", "%.index")->get();
+
+        $permissions = Permission::where('name', "like", "%.index")->get(); //get data only eg:about.index, menu.index
 
         $category = Menu::with(['permission', 'subCategories'])
             ->whereNull('parent_id')

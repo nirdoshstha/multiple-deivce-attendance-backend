@@ -18,6 +18,10 @@ class SettingController extends BackendBaseController implements HasMiddleware
         return [
             new Middleware('permission:settings.show', only: ['show']),
             new Middleware('permission:settings.store', only: ['store']),
+            new Middleware('permission:settings.index', only: ['index']),
+            new Middleware('permission:settings.edit', only: ['edit']),
+            new Middleware('permission:settings.update', only: ['update']),
+            new Middleware('permission:settings.destroy', only: ['destroy']),
         ];
     }
 

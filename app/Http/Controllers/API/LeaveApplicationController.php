@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Mail\LeaveApprovedMail;
 use App\Models\LeaveApplication;
 use App\Models\LeaveType;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules\Exists;
 use Krbaidik\AdBsConverter\Facades\NepaliDate;
 
@@ -21,12 +23,12 @@ class LeaveApplicationController extends BackendBaseController implements HasMid
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:leave-application.index', only: ['index']),
-            new Middleware('permission:leave-application.show', only: ['show']),
-            new Middleware('permission:leave-application.store', only: ['store']),
-            new Middleware('permission:leave-application.edit', only: ['edit']),
-            new Middleware('permission:leave-application.update', only: ['update']),
-            new Middleware('permission:leave-application.destroy', only: ['destroy']),
+            new Middleware('permission:leave-applications.index', only: ['index']),
+            new Middleware('permission:leave-applications.show', only: ['show']),
+            new Middleware('permission:leave-applications.store', only: ['store']),
+            new Middleware('permission:leave-applications.edit', only: ['edit']),
+            new Middleware('permission:leave-applications.update', only: ['update']),
+            new Middleware('permission:leave-applications.destroy', only: ['destroy']),
         ];
     }
     private $model;
@@ -355,25 +357,91 @@ class LeaveApplicationController extends BackendBaseController implements HasMid
         //
     }
 
+    // public function isApproved(Request $request, $id)
+    // {
+    //     $leave = $this->model->find($id);   // find the actual record via the model
+
+    //     // return $leave->role->name;
+    //     $staff_email = $leave->user?->email ;
+
+    //     $details = [
+    //         "name"=> $leave->user?->name,
+    //         "email"=>$leave->user?->email,
+    //         "staff"=>$leave->role->name,
+    //         "approval_remarks" => $leave->approval_remarks
+
+    //     ];
+    //     // return $staff_details;
+
+    //     Mail::to($staff_email)->send(new LeaveApprovedMail($details));
+
+
+    //     if (!$leave) {
+    //         return response()->json([
+    //             'message' => 'Leave application not found'
+    //         ], 404);
+    //     }
+
+
+
+
+    //    $leave->update([
+    //         'approved_by' => auth('sanctum')->user()->id,
+    //         'approval_remarks' => $request->approval_remarks,
+    //         'is_approved' => $request->is_approved,
+    //         'approved_at' => now()
+    //     ]);
+
+
+
+    //     // if($is_leave_approved){
+    //     //     Mail::to($request->user())->send(new MailableClass);
+    //     // }
+
+    //     return response()->json([
+    //         'message' => 'Is Approved saved successfully'
+    //     ]);
+    // }
     public function isApproved(Request $request, $id)
-    {
-        $leave = $this->model->find($id);   // find the actual record via the model
+{
+    $leave = $this->model->with(['user', 'role'])->find($id);
 
-        if (!$leave) {
-            return response()->json([
-                'message' => 'Leave application not found'
-            ], 404);
-        }
-
-        $leave->update([
-            'approved_by' => auth('sanctum')->user()->id,
-            'approval_remarks' => $request->approval_remarks,
-            'is_approved' => $request->is_approved,
-            'approved_at' => now()
-        ]);
-
+    // Check first
+    if (!$leave) {
         return response()->json([
-            'message' => 'Is Approved saved successfully'
-        ]);
+            'message' => 'Leave application not found'
+        ], 404);
     }
+
+    // Update leave first
+    $leave->update([
+        'approved_by' => auth('sanctum')->user()->id,
+        'approval_remarks' => $request->approval_remarks,
+        'is_approved' => $request->is_approved,
+        'approved_at' => now()
+    ]);
+
+    // Get staff email
+    $staffEmail = $leave->user?->email;
+
+    // Send email only if email exists
+    if ($staffEmail) {
+
+        $details = [
+            'name' => $leave->user?->name,
+            'email' => $leave->user?->email,
+            'staff' => $leave->role?->name,
+            'approval_remarks' => $leave->approval_remarks,
+            'is_approved' => $leave->is_approved,
+        ];
+
+        Mail::to($staffEmail)->send(
+            new LeaveApprovedMail($details)
+        );
+    }
+
+    return response()->json([
+        'message' => 'Leave approval saved successfully'
+    ]);
+}
 }

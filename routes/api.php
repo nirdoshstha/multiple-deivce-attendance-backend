@@ -113,8 +113,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::put('/users/update-password/{id}', [AuthController::class, 'updatePassword']);
 
-    Route::post('/settings', [SettingController::class, 'store'])->name('settings.store');
-    Route::get('/settings', [SettingController::class, 'show'])->name('settings.show');
+    // Route::post('/settings', [SettingController::class, 'store'])->name('settings.store');
+    // Route::get('/settings', [SettingController::class, 'show'])->name('settings.show');
+
+    Route::apiResource('/settings',SettingController::class);
 
     Route::get('/about', [AboutController::class, 'index'])->name('about.index');
     Route::post('/about/store', [AboutController::class, 'store'])->name('about.store');

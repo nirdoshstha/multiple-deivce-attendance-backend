@@ -22,7 +22,7 @@ class StaffSeeder extends Seeder
 
         // Get companies
         $companies = Company::query()
-            ->where('status', true)
+            ->where('status', 0)
             ->get();
 
         if ($companies->isEmpty()) {
@@ -46,7 +46,7 @@ class StaffSeeder extends Seeder
                 'email' => 'ram.sharma@example.com',
                 'address' => 'Kathmandu, Nepal',
                 'working_hr' => 8,
-                'status' => true,
+                'status' => 0,
             ],
             [
                 'name' => 'Sita Shrestha',
@@ -55,35 +55,10 @@ class StaffSeeder extends Seeder
                 'email' => 'sita.shrestha@example.com',
                 'address' => 'Lalitpur, Nepal',
                 'working_hr' => 8,
-                'status' => true,
+                'status' => 0,
             ],
-            [
-                'name' => 'Hari Thapa',
-                'gender' => 'Male',
-                'phone' => '9800000003',
-                'email' => 'hari.thapa@example.com',
-                'address' => 'Bhaktapur, Nepal',
-                'working_hr' => 8,
-                'status' => true,
-            ],
-            [
-                'name' => 'Gita Gurung',
-                'gender' => 'Female',
-                'phone' => '9800000004',
-                'email' => 'gita.gurung@example.com',
-                'address' => 'Kathmandu, Nepal',
-                'working_hr' => 8,
-                'status' => true,
-            ],
-            [
-                'name' => 'Bikash Karki',
-                'gender' => 'Male',
-                'phone' => '9800000005',
-                'email' => 'bikash.karki@example.com',
-                'address' => 'Lalitpur, Nepal',
-                'working_hr' => 8,
-                'status' => true,
-            ],
+
+
         ];
 
         foreach ($staffs as $index => $staff) {

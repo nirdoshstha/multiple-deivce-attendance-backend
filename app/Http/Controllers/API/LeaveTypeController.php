@@ -17,12 +17,12 @@ class LeaveTypeController extends BackendBaseController implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:leave-type.index', only: ['index']),
-            new Middleware('permission:leave-type.show', only: ['show']),
-            new Middleware('permission:leave-type.store', only: ['store']),
-            new Middleware('permission:leave-type.edit', only: ['edit']),
-            new Middleware('permission:leave-type.update', only: ['update']),
-            new Middleware('permission:leave-type.destroy', only: ['destroy']),
+            new Middleware('permission:leave-types.index', only: ['index']),
+            new Middleware('permission:leave-types.show', only: ['show']),
+            new Middleware('permission:leave-types.store', only: ['store']),
+            new Middleware('permission:leave-types.edit', only: ['edit']),
+            new Middleware('permission:leave-types.update', only: ['update']),
+            new Middleware('permission:leave-types.destroy', only: ['destroy']),
         ];
     }
 

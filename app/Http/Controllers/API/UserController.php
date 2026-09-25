@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Error;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -181,15 +182,31 @@ class UserController extends BackendBaseController implements HasMiddleware
     }
 
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+
+        public function destroy(string $id)
     {
         $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'User not found.'
+            ], 404);
+        }
+
+        // Check child/related records
+        if ( $user->companies()->exists() || $user->vendors()->exists() ) {
+            return response()->json([
+                'status' => 422,
+                'message' => 'This user cannot be deleted because it has related Company, Vendor and Staff records.'
+            ], 422);
+        }
+
+        // Delete image only when user can actually be deleted
         if ($user->image) {
             $this->deleteImage($user->image);
         }
+
         $user->delete();
 
         return response()->json([

@@ -1,4 +1,4 @@
-<?php
+ <?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -12,7 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('menus', function (Blueprint $table) {
-            $table->foreignId('permission_id')->nullable()->after('name')->constrained('permissions')->nullOnDelete();
+            $table->unsignedBigInteger('permission_id')
+                ->nullable()
+                ->after('name');
+        });
+
+        Schema::table('menus', function (Blueprint $table) {
+            $table->foreign('permission_id')
+                ->references('id')
+                ->on('permissions')
+                ->nullOnDelete();
         });
     }
 
@@ -22,7 +31,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('menus', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('permission_id');
+            $table->dropForeign(['permission_id']);
+            $table->dropColumn('permission_id');
         });
     }
 };

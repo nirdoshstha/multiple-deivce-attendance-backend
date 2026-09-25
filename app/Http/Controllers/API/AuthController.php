@@ -22,16 +22,16 @@ class AuthController extends BackendBaseController
         $this->model = new User();
     }
 
-    public static function middleware(): array
-    {
-        return [
-            new Middleware('permission:users.index', only: ['index']),
-            new Middleware('permission:users.show', only: ['show']),
-            new Middleware('permission:users.store', only: ['store']),
-            new Middleware('permission:users.update', only: ['update']),
-            new Middleware('permission:users.destroy', only: ['destroy']),
-        ];
-    }
+    // public static function middleware(): array
+    // {
+    //     return [
+    //         new Middleware('permission:users.index', only: ['index']),
+    //         new Middleware('permission:users.show', only: ['show']),
+    //         new Middleware('permission:users.store', only: ['store']),
+    //         new Middleware('permission:users.update', only: ['update']),
+    //         new Middleware('permission:users.destroy', only: ['destroy']),
+    //     ];
+    // }
 
     // public function register(Request $request)
     // {
